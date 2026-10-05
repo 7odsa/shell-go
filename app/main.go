@@ -4,6 +4,8 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"os/exec"
+	"slices"
 	"strings"
 	// "math/rand"
 	// "sync"
@@ -12,7 +14,7 @@ import (
 
 // Ensures gofmt doesn't remove the "fmt" import in stage 1 (feel free to remove this!)
 var _ = fmt.Print
-var commands [2]string = [2]string{"exit", "echo"}
+var commands = []string{"exit", "echo", "type"}
 
 func main() {
 
@@ -21,74 +23,84 @@ func main() {
 
 		fmt.Print("$ ")
 
-		command, err := reader.ReadString('\n')
+		prompt, err := reader.ReadString('\n')
 
-		if err != nil {
-			fmt.Fprintln(os.Stderr, "Error reading input:", err)
-			os.Exit(1)
+		handleErr(err)
+		prompt = strings.TrimSpace(prompt)
 
-		}
+		var tokens []string = strings.Split(prompt, " ")
 
-		command = removeNewlineFromCommand(command)
-
-		if hasCommand(command) == false {
-			fmt.Println(command + ": command not found")
-		}
+		hasCommand(tokens)
 	}
 
 }
 
-func hasCommand(command string) bool {
+func hasCommand(tokens []string) bool {
 	switch {
-	case isExit(command):
-		handleExit(command)
+	case tokens[0] == "":
+		return false
+	case isExit(tokens[0]):
+		handleExit()
 		return true
-	case isEcho(command):
-		handleEcho(command)
+	case isEcho(tokens[0]):
+		handleEcho(tokens)
 		return true
-	case isType(command):
-		handleType(command)
+	case isType(tokens[0]):
+		handleType(tokens)
 		return true
+	default:
+		fmt.Println(strings.Join(tokens, "") + ": command not found")
+		return false
 	}
-
-	return false
 
 }
 
-func handleType(command string) {
-
-	if len(command) <= 4 {
-		fmt.Println(": nothing")
+func handleType(tokens []string) {
+	if len(tokens) <= 1 {
+		fmt.Println("")
 		return
 	}
-	command = command[5:]
-	switch {
-	case (isExit(command) || isEcho(command) || isType(command)):
-		fmt.Println(command + " is a shell builtin")
+
+	target := tokens[1]
+
+	if slices.Contains(commands, target) {
+		fmt.Println(target + " is a shell builtin")
+	} else {
+		searchInPaths(tokens)
+	}
+
+}
+func searchInPaths(tokens []string) {
+	target := tokens[1]
+
+	if path, err := exec.LookPath(target); err == nil {
+		fmt.Println(target + " is " + path)
 		return
 	}
-	fmt.Println(command + ": not found")
-	//
+
+	fmt.Println(target + ": not found")
 
 }
 
-func handleEcho(command string) {
-	if len(command) > 4 {
-		fmt.Println(command[5:])
+func handleEcho(tokens []string) {
+	if len(tokens) > 1 {
+		fmt.Println(strings.Join(tokens[1:], " "))
+	} else {
+		fmt.Println("nothing")
+
 	}
-
 }
 
-func handleExit(command string) {
+func handleExit() {
 	os.Exit(0)
 
 }
 
-func isType(command string) bool {
-	return hasPrefixCommand(command, "type")
+func isType(prompt string) bool {
+	return hasPrefixCommand(prompt, "type")
 }
-func isEcho(command string) bool {
-	return hasPrefixCommand(command, "echo")
+func isEcho(prompt string) bool {
+	return hasPrefixCommand(prompt, "echo")
 }
 func hasPrefixCommand(command string, prefix string) bool {
 	return strings.HasPrefix(command, prefix)
@@ -98,6 +110,18 @@ func isExit(command string) bool {
 }
 
 func removeNewlineFromCommand(command string) string {
-	return command[:len(command)-1]
+	if command[:len(command)-1] == "\n" {
+		return command[:len(command)-1]
+	} else {
+		return command
+	}
 
+}
+
+func handleErr(err error) {
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Error reading input:", err)
+		os.Exit(1)
+
+	}
 }
