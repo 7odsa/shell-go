@@ -18,7 +18,7 @@ var _ = fmt.Print
 var builtIns = []string{"exit", "echo", "type", "pwd", "cd"}
 
 func main() {
-	builtin.HomeDir, _ = os.Getwd()
+
 	reader := bufio.NewReader(os.Stdin)
 	for {
 

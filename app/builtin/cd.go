@@ -5,8 +5,6 @@ import (
 	"os"
 )
 
-var HomeDir string
-
 func HandleCd(tokens []string) {
 	if len(tokens) <= 1 {
 		return
@@ -14,7 +12,7 @@ func HandleCd(tokens []string) {
 	newDir := tokens[1]
 
 	if newDir == "~" {
-		newDir = HomeDir
+		newDir, _ = os.UserHomeDir()
 	}
 
 	if err := os.Chdir(newDir); err != nil {
