@@ -15,7 +15,7 @@ import (
 
 // Ensures gofmt doesn't remove the "fmt" import in stage 1 (feel free to remove this!)
 var _ = fmt.Print
-var builtIns = []string{"exit", "echo", "type", "pwd"}
+var builtIns = []string{"exit", "echo", "type", "pwd", "cd"}
 
 func main() {
 
@@ -51,6 +51,9 @@ func hasCommand(tokens []string) bool {
 		return true
 	case utils.IsBuiltIn(tokens[0], "pwd"):
 		builtin.HandlePwd(tokens)
+		return true
+	case utils.IsBuiltIn(tokens[0], "cd"):
+		builtin.HandleCd(tokens)
 		return true
 	case utils.IsExecutable(tokens):
 		builtin.HandleExecutable(tokens)
