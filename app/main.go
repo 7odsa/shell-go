@@ -68,6 +68,7 @@ func handleType(command string) {
 		return
 	}
 	fmt.Println(command + ": not found")
+	//
 
 }
 
