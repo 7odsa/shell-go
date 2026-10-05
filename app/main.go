@@ -61,12 +61,13 @@ func handleType(command string) {
 		fmt.Println(": nothing")
 		return
 	}
+	command = command[5:]
 	switch {
 	case (isExit(command) || isEcho(command)):
-		fmt.Println(command[5:] + " is a shell builtin")
+		fmt.Println(command + " is a shell builtin")
 		return
 	}
-	fmt.Println(command[5:] + ": not found")
+	fmt.Println(command + ": not found")
 
 }
 
