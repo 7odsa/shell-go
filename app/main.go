@@ -63,7 +63,7 @@ func handleType(command string) {
 	}
 	command = command[5:]
 	switch {
-	case (isExit(command) || isEcho(command)):
+	case (isExit(command) || isEcho(command) || isType(command)):
 		fmt.Println(command + " is a shell builtin")
 		return
 	}
