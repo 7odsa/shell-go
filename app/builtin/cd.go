@@ -13,6 +13,6 @@ func HandleCd(tokens []string) {
 
 	if err := os.Chdir(newDirectory); err != nil {
 
-		fmt.Println("cd: " + newDirectory + ": No such file or ")
+		fmt.Println("cd: " + newDirectory + ": No such file or directory")
 	}
 }
