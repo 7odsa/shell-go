@@ -37,7 +37,7 @@ func main() {
 
 func hasCommand(tokens []string) bool {
 	switch {
-	case tokens[0] == "":
+	case isEmptyPrompt(tokens):
 		return false
 	case isExit(tokens[0]):
 		handleExit()
@@ -48,6 +48,9 @@ func hasCommand(tokens []string) bool {
 	case isType(tokens[0]):
 		handleType(tokens)
 		return true
+	case isExecutable(tokens):
+		handleExecutable(tokens)
+		return true
 	default:
 		fmt.Println(strings.Join(tokens, "") + ": command not found")
 		return false
@@ -55,8 +58,20 @@ func hasCommand(tokens []string) bool {
 
 }
 
+func searchInPaths(tokens []string) {
+	target := tokens[1]
+
+	if path, err := exec.LookPath(target); err == nil {
+		fmt.Println(target + " is " + path)
+		return
+	}
+
+	fmt.Println(target + ": not found")
+
+}
+
 func handleType(tokens []string) {
-	if len(tokens) <= 1 {
+	if isOneWord(tokens) {
 		fmt.Println("")
 		return
 	}
@@ -70,32 +85,43 @@ func handleType(tokens []string) {
 	}
 
 }
-func searchInPaths(tokens []string) {
-	target := tokens[1]
-
-	if path, err := exec.LookPath(target); err == nil {
-		fmt.Println(target + " is " + path)
-		return
-	}
-
-	fmt.Println(target + ": not found")
-
-}
 
 func handleEcho(tokens []string) {
-	if len(tokens) > 1 {
-		fmt.Println(strings.Join(tokens[1:], " "))
-	} else {
+	if isOneWord(tokens) {
 		fmt.Println("nothing")
-
 	}
+
+	fmt.Println(strings.Join(tokens[1:], " "))
 }
 
 func handleExit() {
 	os.Exit(0)
 
 }
+func handleExecutable(tokens []string) {
+	target := tokens[0]
+	if _, err := exec.LookPath(target); err == nil {
 
+		cmd := exec.Command(target, tokens[1:]...)
+
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		cmd.Run()
+	}
+
+}
+
+func isExecutable(tokens []string) bool {
+	target := tokens[0]
+
+	if _, err := exec.LookPath(target); err == nil {
+		return true
+	}
+	return false
+}
+func isEmptyPrompt(tokens []string) bool {
+	return tokens[0] == ""
+}
 func isType(prompt string) bool {
 	return hasPrefixCommand(prompt, "type")
 }
@@ -117,7 +143,9 @@ func removeNewlineFromCommand(command string) string {
 	}
 
 }
-
+func isOneWord(tokens []string) bool {
+	return len(tokens) <= 1
+}
 func handleErr(err error) {
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Error reading input:", err)
