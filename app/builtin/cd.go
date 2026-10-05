@@ -5,14 +5,22 @@ import (
 	"os"
 )
 
+var PrevWd string
+
 func HandleCd(tokens []string) {
 	if len(tokens) <= 1 {
 		return
 	}
-	newDirectory := tokens[1]
+	newDir := tokens[1]
 
-	if err := os.Chdir(newDirectory); err != nil {
+	if newDir == "~" {
+		newDir = PrevWd
+	}
 
-		fmt.Println("cd: " + newDirectory + ": No such file or directory")
+	wd, _ := os.Getwd()
+	PrevWd = wd
+
+	if err := os.Chdir(newDir); err != nil {
+		fmt.Println("cd: " + newDir + ": No such file or directory")
 	}
 }
