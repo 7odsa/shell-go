@@ -81,7 +81,6 @@ func HandleQuotes(prompt string) []string {
 		res = append(res, word)
 
 	}
-	println(strings.Join(res, "&&"))
 	return res
 }
 
