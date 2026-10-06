@@ -72,6 +72,7 @@ func HandleQuotes(prompt string) []string {
 			} else if char == ' ' && isFirstSpace {
 				isFirstSpace = false
 				res = append(res, word)
+				word = ""
 				word += string(char)
 			}
 		}
