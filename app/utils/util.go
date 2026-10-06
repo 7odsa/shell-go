@@ -20,18 +20,18 @@ func HandleQuotes(prompt string) []string {
 		switch char {
 		case '\\':
 			isFirstSpace = false
-			i++
-			if i == len(prompt) || (char == ' ' && prompt[i+1] == ' ') {
-				break
-			}
-			char = prompt[i]
 
-			if word != "" && char == ' ' {
-				res = append(res, word)
-				word = ""
-			} else {
+			for j := i; j < len(prompt)-2 && prompt[j] == '\\'; j += 2 {
+				char = prompt[j+1]
 				word += string(char)
+				if prompt[j+2] != '\\' {
+					i = j + 2
+					res = append(res, word)
+					break
+				}
+
 			}
+			word = ""
 
 		case '"':
 			isDoubleQuote = !isDoubleQuote
