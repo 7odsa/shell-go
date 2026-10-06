@@ -71,6 +71,7 @@ func HandleQuotes(prompt string) []string {
 
 			} else if char == ' ' && isFirstSpace {
 				isFirstSpace = false
+				res = append(res, word)
 				word += string(char)
 			}
 		}
@@ -80,15 +81,8 @@ func HandleQuotes(prompt string) []string {
 		res = append(res, word)
 
 	}
-
 	println(strings.Join(res, "&&"))
-
 	return res
-}
-func appendToTokensIfNotEmpty(tokens []string, word string) {
-	if strings.Trim(word, " ") != "" {
-		tokens = append(tokens, word)
-	}
 }
 
 func SearchInPaths(tokens []string) {
