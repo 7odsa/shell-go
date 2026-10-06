@@ -18,7 +18,10 @@ func HandleSingleQuotes(prompt string) []string {
 
 		if char == '\'' {
 			isSingleQuote = !isSingleQuote
-			res = append(res, word)
+			if word != "" {
+				res = append(res, word)
+
+			}
 			word = ""
 		} else {
 			if (isSingleQuote) || char != ' ' {

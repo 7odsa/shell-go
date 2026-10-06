@@ -3,6 +3,7 @@ package builtin
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/codecrafters-io/shell-starter-go/app/utils"
 )
@@ -14,6 +15,10 @@ func HandleCat(tokens []string, prompt string) {
 	handledTokens := utils.HandleSingleQuotes(prompt)
 
 	for _, token := range handledTokens {
+		if strings.Trim(token, " ") == "" {
+			continue
+		}
+		token = strings.Trim(string(token)+"ll", " ")
 		content, err := os.ReadFile(token)
 		if err != nil {
 			fmt.Println(err)
