@@ -46,7 +46,7 @@ func HandleQuotes(prompt string) []string {
 
 			isDoubleQuote = !isDoubleQuote
 
-			if strings.Trim(word, " ") != "" {
+			if word != "" {
 				res = append(res, word)
 			}
 			word = ""
@@ -54,8 +54,9 @@ func HandleQuotes(prompt string) []string {
 
 			if !isDoubleQuote {
 				isSingleQuote = !isSingleQuote
-				if strings.Trim(word, " ") != "" {
+				if word != "" {
 					res = append(res, word)
+
 				}
 				word = ""
 			} else {
@@ -71,20 +72,23 @@ func HandleQuotes(prompt string) []string {
 			} else if char == ' ' && isFirstSpace {
 				isFirstSpace = false
 				word += string(char)
-				if strings.Trim(word, " ") != "" {
-					res = append(res, word)
-				}
-				word = ""
-
 			}
 		}
 
 	}
-	if strings.Trim(word, " ") != "" {
+	if word != "" {
 		res = append(res, word)
+
 	}
 
+	println(strings.Join(res, "&&"))
+
 	return res
+}
+func appendToTokensIfNotEmpty(tokens []string, word string) {
+	if strings.Trim(word, " ") != "" {
+		tokens = append(tokens, word)
+	}
 }
 
 func SearchInPaths(tokens []string) {
