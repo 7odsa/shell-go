@@ -31,12 +31,12 @@ func main() {
 
 		var tokens []string = strings.Split(prompt, " ")
 
-		hasCommand(tokens)
+		hasCommand(tokens, prompt)
 	}
 
 }
 
-func hasCommand(tokens []string) bool {
+func hasCommand(tokens []string, prompt string) bool {
 	switch {
 	case utils.IsEmptyPrompt(tokens):
 		return false
@@ -44,7 +44,7 @@ func hasCommand(tokens []string) bool {
 		os.Exit(0)
 		return true
 	case utils.IsBuiltIn(tokens[0], "echo"):
-		builtin.HandleEcho(tokens)
+		builtin.HandleEcho(tokens, strings.TrimLeft(strings.Trim(prompt, "echo"), " "))
 		return true
 	case utils.IsBuiltIn(tokens[0], "type"):
 		builtin.HandleType(tokens, builtIns)
