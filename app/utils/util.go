@@ -46,20 +46,16 @@ func HandleQuotes(prompt string) []string {
 
 			isDoubleQuote = !isDoubleQuote
 
-			if word != "" {
-				if strings.Trim(word, " ") != "" {
-					res = append(res, word)
-				}
+			if strings.Trim(word, " ") != "" {
+				res = append(res, word)
 			}
 			word = ""
 		case '\'':
 
 			if !isDoubleQuote {
 				isSingleQuote = !isSingleQuote
-				if word != "" {
-					if strings.Trim(word, " ") != "" {
-						res = append(res, word)
-					}
+				if strings.Trim(word, " ") != "" {
+					res = append(res, word)
 				}
 				word = ""
 			} else {
@@ -75,14 +71,17 @@ func HandleQuotes(prompt string) []string {
 			} else if char == ' ' && isFirstSpace {
 				isFirstSpace = false
 				word += string(char)
+				if strings.Trim(word, " ") != "" {
+					res = append(res, word)
+				}
+				word = ""
+
 			}
 		}
 
 	}
-	if word != "" {
-		if strings.Trim(word, " ") != "" {
-			res = append(res, word)
-		}
+	if strings.Trim(word, " ") != "" {
+		res = append(res, word)
 	}
 
 	return res
