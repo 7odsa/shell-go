@@ -19,7 +19,7 @@ func HandleQuotes(prompt string) []string {
 		char := prompt[i]
 		switch char {
 		case '\\':
-			isFirstSpace = false
+			isFirstSpace = true
 
 			for j := i; j < len(prompt)-2 && prompt[j] == '\\'; j += 2 {
 				char = prompt[j+1]
