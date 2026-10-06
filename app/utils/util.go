@@ -26,12 +26,10 @@ func HandleQuotes(prompt string) []string {
 				word += string(char)
 				if prompt[j+2] != '\\' {
 					i = j + 1
-					res = append(res, word)
 					break
 				}
 
 			}
-			word = ""
 
 		case '"':
 			isDoubleQuote = !isDoubleQuote
