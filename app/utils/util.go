@@ -7,6 +7,39 @@ import (
 	"strings"
 )
 
+func HandleSingleQuotes(prompt string) []string {
+	var word string = ""
+	var res []string
+
+	var isSingleQuote bool = false
+	var isFirstSpace bool = true
+
+	for _, char := range prompt {
+
+		if char == '\'' {
+			isSingleQuote = !isSingleQuote
+			res = append(res, word)
+			word = ""
+		} else {
+			if (isSingleQuote) || char != ' ' {
+				isFirstSpace = true
+				word += string(char)
+
+			} else if char == ' ' && isFirstSpace {
+				isFirstSpace = false
+				word += string(char)
+			}
+		}
+
+	}
+	if word != "" {
+		res = append(res, word)
+
+	}
+
+	return res
+}
+
 func SearchInPaths(tokens []string) {
 	target := tokens[1]
 
