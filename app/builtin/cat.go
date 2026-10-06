@@ -10,7 +10,8 @@ import (
 
 func HandleCat(tokens []string, prompt string) {
 	if utils.IsOneWord(tokens) {
-		fmt.Println("nothing")
+		fmt.Println("")
+		return
 	}
 	handledTokens := utils.HandleSingleQuotes(prompt)
 

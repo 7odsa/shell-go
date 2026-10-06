@@ -40,9 +40,6 @@ func hasCommand(tokens []string, prompt string) bool {
 	switch {
 	case utils.IsEmptyPrompt(tokens):
 		return false
-	case utils.IsOneWord(tokens) && tokens[0] != "pwd" && tokens[0] != "exit":
-		fmt.Println("nothing")
-		return true
 
 	case utils.IsBuiltIn(tokens[0], "exit"):
 		os.Exit(0)
@@ -64,6 +61,7 @@ func hasCommand(tokens []string, prompt string) bool {
 	case utils.IsBuiltIn(tokens[0], "cd"):
 		builtin.HandleCd(tokens)
 		return true
+
 	case utils.IsExecutable(tokens):
 		builtin.HandleExecutable(tokens)
 		return true

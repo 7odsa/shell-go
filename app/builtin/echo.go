@@ -8,6 +8,10 @@ import (
 )
 
 func HandleEcho(tokens []string, prompt string) {
+	if utils.IsOneWord(tokens) {
+		fmt.Println("")
+		return
+	}
 
 	res := strings.Join(utils.HandleSingleQuotes(prompt), "")
 	fmt.Println(res)

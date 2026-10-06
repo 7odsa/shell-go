@@ -8,7 +8,10 @@ import (
 )
 
 func HandleType(tokens []string, builtIns []string) {
-
+	if utils.IsOneWord(tokens) {
+		fmt.Println("")
+		return
+	}
 	target := tokens[1]
 
 	if slices.Contains(builtIns, target) && target != "cat" {
