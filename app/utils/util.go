@@ -19,7 +19,7 @@ func HandleQuotes(prompt string) []string {
 
 		switch char {
 		case '"':
-			isDoubleQuote = !isSingleQuote
+			isDoubleQuote = !isDoubleQuote
 			if word != "" {
 				res = append(res, word)
 
@@ -37,7 +37,7 @@ func HandleQuotes(prompt string) []string {
 				word += string(char)
 			}
 		default:
-			if (isSingleQuote) || isDoubleQuote || char != ' ' {
+			if isSingleQuote || isDoubleQuote || char != ' ' {
 				isFirstSpace = true
 				word += string(char)
 
