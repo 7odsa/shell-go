@@ -25,7 +25,7 @@ func HandleQuotes(prompt string) []string {
 				char = prompt[j+1]
 				word += string(char)
 				if prompt[j+2] != '\\' {
-					i = j + 2
+					i = j + 1
 					res = append(res, word)
 					break
 				}
