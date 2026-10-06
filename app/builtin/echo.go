@@ -10,6 +10,7 @@ import (
 func HandleEcho(tokens []string, prompt string) {
 	if utils.IsOneWord(tokens) {
 		fmt.Println("nothing")
+		return
 	}
 	fmt.Println(strings.Join(utils.HandleSingleQuotes(prompt), ""))
 

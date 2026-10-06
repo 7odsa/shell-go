@@ -44,7 +44,7 @@ func hasCommand(tokens []string, prompt string) bool {
 		os.Exit(0)
 		return true
 	case utils.IsBuiltIn(tokens[0], "echo"):
-		builtin.HandleEcho(tokens, strings.TrimLeft(strings.Trim(prompt, "echo"), " "))
+		builtin.HandleEcho(tokens, strings.TrimLeft(strings.TrimPrefix(prompt, "echo"), " "))
 		return true
 	case utils.IsBuiltIn(tokens[0], "type"):
 		builtin.HandleType(tokens, builtIns)
