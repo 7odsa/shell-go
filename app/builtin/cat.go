@@ -18,7 +18,7 @@ func HandleCat(tokens []string, prompt string) {
 		if strings.Trim(token, " ") == "" {
 			continue
 		}
-		token = strings.Trim(string(token)+"ll", " ")
+		token = strings.Trim(string(token), " ")
 		content, err := os.ReadFile(token)
 		if err != nil {
 			fmt.Println(err)
