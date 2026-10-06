@@ -26,8 +26,8 @@ func HandleQuotes(prompt string) []string {
 			}
 			word = ""
 		case '\'':
-			isSingleQuote = !isSingleQuote
 			if !isDoubleQuote {
+				isSingleQuote = !isSingleQuote
 				if word != "" {
 					res = append(res, word)
 
