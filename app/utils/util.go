@@ -47,7 +47,9 @@ func HandleQuotes(prompt string) []string {
 			isDoubleQuote = !isDoubleQuote
 
 			if word != "" {
-				res = append(res, word)
+				if strings.Trim(word, " ") != "" {
+					res = append(res, word)
+				}
 			}
 			word = ""
 		case '\'':
@@ -55,8 +57,9 @@ func HandleQuotes(prompt string) []string {
 			if !isDoubleQuote {
 				isSingleQuote = !isSingleQuote
 				if word != "" {
-					res = append(res, word)
-
+					if strings.Trim(word, " ") != "" {
+						res = append(res, word)
+					}
 				}
 				word = ""
 			} else {
@@ -77,8 +80,9 @@ func HandleQuotes(prompt string) []string {
 
 	}
 	if word != "" {
-		res = append(res, word)
-
+		if strings.Trim(word, " ") != "" {
+			res = append(res, word)
+		}
 	}
 
 	return res
