@@ -8,10 +8,6 @@ import (
 )
 
 func HandleType(tokens []string, builtIns []string) {
-	if utils.IsOneWord(tokens) {
-		fmt.Println("")
-		return
-	}
 
 	target := tokens[1]
 

@@ -6,9 +6,7 @@ import (
 )
 
 func HandleCd(tokens []string) {
-	if len(tokens) <= 1 {
-		return
-	}
+
 	newDir := tokens[1]
 
 	if newDir == "~" {
