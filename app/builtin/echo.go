@@ -13,7 +13,7 @@ func HandleEcho(tokens []string, prompt string) {
 		return
 	}
 
-	res := strings.Join(utils.HandleSingleQuotes(prompt), "")
+	res := strings.Join(utils.HandleQuotes(prompt), "")
 	fmt.Println(res)
 
 }

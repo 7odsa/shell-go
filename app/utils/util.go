@@ -7,24 +7,37 @@ import (
 	"strings"
 )
 
-func HandleSingleQuotes(prompt string) []string {
+func HandleQuotes(prompt string) []string {
 	var word string = ""
 	var res []string
 
 	var isSingleQuote bool = false
+	var isDoubleQuote bool = false
 	var isFirstSpace bool = true
 
 	for _, char := range prompt {
 
-		if char == '\'' {
-			isSingleQuote = !isSingleQuote
+		switch char {
+		case '"':
+			isDoubleQuote = !isSingleQuote
 			if word != "" {
 				res = append(res, word)
 
 			}
 			word = ""
-		} else {
-			if (isSingleQuote) || char != ' ' {
+		case '\'':
+			isSingleQuote = !isSingleQuote
+			if !isDoubleQuote {
+				if word != "" {
+					res = append(res, word)
+
+				}
+				word = ""
+			} else {
+				word += string(char)
+			}
+		default:
+			if (isSingleQuote) || isDoubleQuote || char != ' ' {
 				isFirstSpace = true
 				word += string(char)
 

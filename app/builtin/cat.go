@@ -13,7 +13,7 @@ func HandleCat(tokens []string, prompt string) {
 		fmt.Println("")
 		return
 	}
-	handledTokens := utils.HandleSingleQuotes(prompt)
+	handledTokens := utils.HandleQuotes(prompt)
 
 	for _, token := range handledTokens {
 		if strings.Trim(token, " ") == "" {
