@@ -27,6 +27,5 @@ func HandleCat(tokens []string, prompt string) {
 
 		fmt.Print(string(content))
 	}
-	fmt.Println()
 
 }
