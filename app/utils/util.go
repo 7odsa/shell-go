@@ -121,7 +121,7 @@ func SearchInPaths(tokens []string) {
 func IsExecutable(tokens []string, prompt string) bool {
 	handledTokens := (HandleQuotes(prompt))
 	target := handledTokens[0]
-	println(target)
+
 	if _, err := exec.LookPath(target); err == nil {
 		return true
 	}
