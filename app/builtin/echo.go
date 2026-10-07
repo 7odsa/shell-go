@@ -1,13 +1,15 @@
 package builtin
 
-import (
-	"fmt"
-	"strings"
-)
-
 func HandleEcho(tokens []string, prompt string) {
 
-	res := strings.Join(tokens, "")
-	fmt.Println(res)
+	// slices.Contains(tokens, ">")
+	// slices.Contains(tokens, "1>")
+	// for i, _ := range tokens {
+	// 	fmt.Println(tokens[i])
+	// }
+
+	// res := strings.Join(tokens, "")
+
+	// fmt.Println(res)
 
 }

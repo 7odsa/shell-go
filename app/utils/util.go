@@ -88,11 +88,11 @@ func HandleQuotes(prompt string) []string {
 
 			} else if char == ' ' && isFirstSpace {
 				isFirstSpace = false
-				if word != "" {
+				word += string(char)
+				if strings.TrimLeft(word, " ") != "" {
 					res = append(res, word)
 				}
 				word = ""
-				word += string(char)
 			}
 		}
 
