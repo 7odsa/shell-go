@@ -28,8 +28,13 @@ func HandleQuotes(prompt string) []string {
 
 		switch char {
 		case '\\':
-			isBackslach = !isBackslach
+			if isSingleQuote || isDoubleQuote || char != ' ' {
+				isFirstSpace = true
+				word += string(char)
 
+			} else {
+				isBackslach = !isBackslach
+			}
 			// isFirstSpace = true
 			// for j := i; j < len(prompt)-2 && prompt[j] == '\\'; j += 2 {
 			// 	char = prompt[j+1]
@@ -44,6 +49,11 @@ func HandleQuotes(prompt string) []string {
 			// }
 		case '"':
 
+			if isSingleQuote || isDoubleQuote || char != ' ' {
+				isFirstSpace = true
+				word += string(char)
+				break
+			}
 			isDoubleQuote = !isDoubleQuote
 
 			if word != "" {
@@ -55,6 +65,8 @@ func HandleQuotes(prompt string) []string {
 			if !isDoubleQuote {
 				isSingleQuote = !isSingleQuote
 				if word != "" {
+					// println(string(word[len(word)-1]))
+
 					res = append(res, word)
 
 				}
@@ -82,6 +94,9 @@ func HandleQuotes(prompt string) []string {
 		res = append(res, word)
 
 	}
+
+	// println(strings.Join(res,"&&"))
+
 	return res
 }
 
