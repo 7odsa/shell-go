@@ -54,8 +54,11 @@ func HandleQuotes(prompt string) []string {
 			// 	word += string(char)
 			// 	break
 			// }
-			isDoubleQuote = !isDoubleQuote
-
+			if !isSingleQuote {
+				isDoubleQuote = !isDoubleQuote
+			} else {
+				word += string(char)
+			}
 			// if word != "" {
 			// 	res = append(res, word)
 			// }
