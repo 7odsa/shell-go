@@ -64,13 +64,13 @@ func HandleQuotes(prompt string) []string {
 
 			if !isDoubleQuote {
 				isSingleQuote = !isSingleQuote
-				if word != "" {
-					// println(string(word[len(word)-1]))
+				// if word != "" {
+				// 	// println(string(word[len(word)-1]))
 
-					res = append(res, word)
+				// 	res = append(res, word)
 
-				}
-				word = ""
+				// }
+				// word = ""
 			} else {
 				word += string(char)
 			}
