@@ -49,17 +49,17 @@ func HandleQuotes(prompt string) []string {
 			// }
 		case '"':
 
-			if isSingleQuote || isDoubleQuote || char != ' ' {
-				isFirstSpace = true
-				word += string(char)
-				break
-			}
+			// if isSingleQuote || isDoubleQuote || char != ' ' {
+			// 	isFirstSpace = true
+			// 	word += string(char)
+			// 	break
+			// }
 			isDoubleQuote = !isDoubleQuote
 
-			if word != "" {
-				res = append(res, word)
-			}
-			word = ""
+			// if word != "" {
+			// 	res = append(res, word)
+			// }
+			// word = ""
 		case '\'':
 
 			if !isDoubleQuote {
