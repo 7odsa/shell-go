@@ -3,7 +3,6 @@ package builtin
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/codecrafters-io/shell-starter-go/app/utils"
 )
@@ -14,7 +13,7 @@ func HandleCd(tokens []string) {
 		return
 	}
 
-	newDir := strings.TrimLeft(tokens[1], " ")
+	newDir := tokens[1]
 
 	if newDir == "~" {
 		newDir, _ = os.UserHomeDir()
