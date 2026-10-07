@@ -89,7 +89,7 @@ func HandleQuotes(prompt string) []string {
 			} else if char == ' ' && isFirstSpace {
 				isFirstSpace = false
 				word += string(char)
-				if strings.TrimLeft(word, " ") != "" {
+				if word != "" {
 					res = append(res, word)
 				}
 				word = ""
@@ -106,6 +106,29 @@ func HandleQuotes(prompt string) []string {
 	// println(strings.Join(res, "&&"))
 
 	return res
+}
+
+func HandleRedirectStdout(tokens []string, prompt string) bool {
+
+	indexOp := -1
+	for i, s := range tokens {
+		if strings.Trim(s, " ") == ">" || strings.Trim(s, " ") == "1>" {
+			indexOp = i
+			break
+		}
+	}
+	if indexOp == -1 {
+		return false
+	}
+
+	fileName := tokens[indexOp+1]
+	args := tokens[:indexOp-1]
+
+	err := os.WriteFile(fileName, []byte(strings.Join(args, "")), 0644)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return true
 }
 
 func SearchInPaths(tokens []string) {
@@ -142,7 +165,8 @@ func HasPrefixCommand(command string, prefix string) bool {
 }
 
 func IsBuiltIn(command string, builtIn string) bool {
-	return (command == builtIn)
+	target := strings.Trim(command, " ")
+	return (target == builtIn)
 }
 
 func RemoveNewlineFromCommand(command string) string {

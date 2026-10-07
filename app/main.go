@@ -43,6 +43,7 @@ func hasCommand(tokens []string, prompt string) bool {
 		tokens[1] = strings.TrimLeft(tokens[1], " ")
 
 	}
+
 	switch {
 
 	case utils.IsBuiltIn(tokens[0], "exit"):
