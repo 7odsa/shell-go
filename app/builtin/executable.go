@@ -4,15 +4,13 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-
-	"github.com/codecrafters-io/shell-starter-go/app/utils"
 )
 
 func HandleExecutable(tokens []string, prompt string) {
 
-	if utils.HandleRedirectStdout(tokens[1:], "") {
-		return
-	}
+	// if utils.HandleRedirectStdout(tokens[1:], "") {
+	// 	return
+	// }
 
 	for i, s := range tokens {
 		tokens[i] = strings.Trim(s, " ")
