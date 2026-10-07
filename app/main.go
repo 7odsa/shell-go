@@ -28,8 +28,10 @@ func main() {
 
 		utils.HandleErr(err)
 		prompt = strings.TrimSpace(prompt)
-
-		var tokens []string = strings.Split(prompt, " ")
+		if utils.IsEmptyPrompt(prompt) {
+			continue
+		}
+		var tokens []string = utils.HandleQuotes(prompt)
 
 		hasCommand(tokens, prompt)
 	}
@@ -38,8 +40,6 @@ func main() {
 
 func hasCommand(tokens []string, prompt string) bool {
 	switch {
-	case utils.IsEmptyPrompt(tokens):
-		return false
 
 	case utils.IsBuiltIn(tokens[0], "exit"):
 		os.Exit(0)
@@ -49,10 +49,10 @@ func hasCommand(tokens []string, prompt string) bool {
 		return true
 
 	case utils.IsBuiltIn(tokens[0], "echo"):
-		builtin.HandleEcho(tokens, strings.TrimLeft(strings.TrimPrefix(prompt, "echo"), " "))
+		builtin.HandleEcho(tokens[1:], strings.TrimLeft(strings.TrimPrefix(prompt, "echo"), " "))
 		return true
 	case utils.IsBuiltIn(tokens[0], "cat"):
-		builtin.HandleCat(tokens, strings.TrimLeft(strings.TrimPrefix(prompt, "cat"), " "))
+		builtin.HandleCat(tokens[1:], strings.TrimLeft(strings.TrimPrefix(prompt, "cat"), " "))
 		return true
 	case utils.IsBuiltIn(tokens[0], "type"):
 		builtin.HandleType(tokens, builtIns)
@@ -66,7 +66,7 @@ func hasCommand(tokens []string, prompt string) bool {
 		builtin.HandleExecutable(tokens, prompt)
 		return true
 	default:
-		fmt.Println(strings.Join(tokens, " ") + ": command not found")
+		fmt.Println(strings.Join(tokens, "") + ": command not found")
 		return false
 	}
 

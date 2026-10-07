@@ -3,19 +3,20 @@ package builtin
 import (
 	"os"
 	"os/exec"
-
-	"github.com/codecrafters-io/shell-starter-go/app/utils"
+	"strings"
 )
 
 func HandleExecutable(tokens []string, prompt string) {
-	handledTokens := (utils.HandleQuotes(prompt))
-	target := handledTokens[0]
 
-	println(target)
+	for i, s := range tokens {
+		tokens[i] = strings.Trim(s, " ")
+	}
+
+	target := strings.Trim(tokens[0], " ")
 
 	if _, err := exec.LookPath(target); err == nil {
 
-		cmd := exec.Command(target, handledTokens[1:]...)
+		cmd := exec.Command(target, tokens[1:]...)
 
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr

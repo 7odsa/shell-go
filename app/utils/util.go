@@ -121,16 +121,16 @@ func SearchInPaths(tokens []string) {
 }
 
 func IsExecutable(tokens []string, prompt string) bool {
-	handledTokens := (HandleQuotes(prompt))
-	target := handledTokens[0]
+
+	target := strings.Trim(tokens[0], " ")
 
 	if _, err := exec.LookPath(target); err == nil {
 		return true
 	}
 	return false
 }
-func IsEmptyPrompt(tokens []string) bool {
-	return tokens[0] == ""
+func IsEmptyPrompt(prompt string) bool {
+	return prompt == ""
 }
 
 // func isType(prompt string) bool {

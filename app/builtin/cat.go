@@ -13,9 +13,8 @@ func HandleCat(tokens []string, prompt string) {
 		fmt.Println("")
 		return
 	}
-	handledTokens := (utils.HandleQuotes(prompt))
 
-	for _, token := range handledTokens {
+	for _, token := range tokens {
 		if strings.Trim(token, " ") == "" {
 			continue
 		}
