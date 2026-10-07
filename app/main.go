@@ -66,7 +66,7 @@ func hasCommand(tokens []string, prompt string) bool {
 		builtin.HandleExecutable(tokens, strings.TrimLeft(strings.TrimPrefix(prompt, "cat"), " "))
 		return true
 	default:
-		fmt.Println(strings.Join(tokens, "") + ": command not found")
+		fmt.Println(strings.Join(tokens, " ") + ": command not found")
 		return false
 	}
 

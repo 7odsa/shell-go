@@ -12,6 +12,7 @@ func HandleExecutable(tokens []string, prompt string) {
 	target := handledTokens[0]
 
 	println(target)
+
 	if _, err := exec.LookPath(target); err == nil {
 
 		cmd := exec.Command(target, handledTokens[1:]...)
