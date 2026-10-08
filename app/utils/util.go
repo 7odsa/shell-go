@@ -135,11 +135,7 @@ func handleAppendStdout(tokens []string, indexOp int) bool {
 	fileName := tokens[indexOp+1]
 	args := tokens[:indexOp]
 
-	file, err := os.Create(fileName)
-
-	content, _ := os.ReadFile(fileName)
-
-	args = append(args, string(content))
+	file, err := os.OpenFile(fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 
 	cmd := exec.Command(args[0], args[1:]...)
 
