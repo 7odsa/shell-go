@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 )
 
@@ -298,19 +299,28 @@ func HandleErr(err error) {
 	}
 }
 func GetAllExecutableFiles() []string {
+
+	pathEnv := os.Getenv("PATH")
+
 	exeFiles := []string{}
 
-	var outbuf, errbuf strings.Builder // or bytes.Buffer
+	for _, dir := range filepath.SplitList(pathEnv) {
+		entries, err := os.ReadDir(dir)
+		if err != nil {
+			continue
+		}
+		for _, entry := range entries {
+			info, err := entry.Info()
+			if err != nil {
+				continue
+			}
+			if !info.IsDir() && info.Mode().Perm()&0111 != 0 {
+				exeFiles = append(exeFiles, entry.Name())
+			}
+		}
+	}
 
-	cmd := exec.Command("ls")
+	// println(exeFiles)
 
-	cmd.Stdout = &outbuf
-	cmd.Stderr = &errbuf
-
-	cmd.Run()
-
-	stdout := outbuf.String()
-	// println(stdout)
-	exeFiles = strings.Split(stdout, "\n")
 	return exeFiles
 }
