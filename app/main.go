@@ -15,6 +15,19 @@ import (
 
 var builtIns = []string{"exit", "echo", "type", "pwd", "cd", "cat"}
 
+type BellCompleter struct {
+	readline.AutoCompleter
+}
+
+func (bc *BellCompleter) Do(line []rune, pos int) ([][]rune, int) {
+	newLine, length := bc.AutoCompleter.Do(line, pos)
+	if len(newLine) == 0 {
+		fmt.Print("\x07")
+		os.Stdout.Sync()
+	}
+	return newLine, length
+}
+
 func main() {
 
 	autoCompleter := readline.NewPrefixCompleter(
@@ -22,9 +35,11 @@ func main() {
 		readline.PcItem("exit"),
 	)
 
+	bellComp := &BellCompleter{AutoCompleter: autoCompleter}
+
 	reader, err := readline.NewEx(&readline.Config{
 		Prompt:       "$ ",
-		AutoComplete: autoCompleter,
+		AutoComplete: bellComp,
 	})
 
 	if err != nil {
