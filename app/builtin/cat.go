@@ -15,7 +15,7 @@ func HandleCat(tokens []string, prompt string) {
 		return
 	}
 
-	for _, token := range tokens {
+	for _, token := range tokens[1:] {
 		if strings.Trim(token, " ") == "" {
 			continue
 		}

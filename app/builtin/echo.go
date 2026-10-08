@@ -19,7 +19,7 @@ func HandleEcho(tokens []string, prompt string) {
 		return
 	}
 
-	res := strings.Join(tokens, "")
+	res := strings.Join(tokens[1:], " ")
 
 	fmt.Println(res)
 

@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"strings"
@@ -88,7 +89,6 @@ func HandleQuotes(prompt string) []string {
 
 			} else if char == ' ' && isFirstSpace {
 				isFirstSpace = false
-				word += string(char)
 				if word != "" {
 					res = append(res, word)
 				}
@@ -123,16 +123,25 @@ func HandleRedirectStdout(tokens []string, prompt string) bool {
 
 	fileName := tokens[indexOp+1]
 	args := tokens[:indexOp]
-	var b []byte
-	for _, s := range args {
-		b = append(b, s...)
-	}
 
-	err := os.WriteFile(fileName, b, 0644)
+	cmd := exec.Command(args[0], args[1:]...)
+
+	file, err := os.Create(fileName)
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 		return false
 	}
+	defer file.Close()
+
+	cmd.Stdout = file
+	cmd.Stderr = os.Stderr
+
+	err = cmd.Run()
+	if err != nil {
+		log.Fatal(err)
+		return false
+	}
+
 	return true
 }
 

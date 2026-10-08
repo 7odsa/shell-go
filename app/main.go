@@ -54,10 +54,10 @@ func hasCommand(tokens []string, prompt string) bool {
 		return true
 
 	case utils.IsBuiltIn(tokens[0], "echo"):
-		builtin.HandleEcho(tokens[1:], strings.TrimLeft(strings.TrimSuffix(prompt, "echo"), " "))
+		builtin.HandleEcho(tokens, strings.TrimLeft(strings.TrimSuffix(prompt, "echo"), " "))
 		return true
 	case utils.IsBuiltIn(tokens[0], "cat"):
-		builtin.HandleCat(tokens[1:], strings.TrimLeft(strings.TrimSuffix(prompt, "cat"), " "))
+		builtin.HandleCat(tokens, strings.TrimLeft(strings.TrimSuffix(prompt, "cat"), " "))
 		return true
 	case utils.IsBuiltIn(tokens[0], "type"):
 		builtin.HandleType(tokens, builtIns)
