@@ -297,3 +297,20 @@ func HandleErr(err error) {
 
 	}
 }
+func GetAllExecutableFiles() []string {
+	exeFiles := []string{}
+
+	var outbuf, errbuf strings.Builder // or bytes.Buffer
+
+	cmd := exec.Command("ls")
+
+	cmd.Stdout = &outbuf
+	cmd.Stderr = &errbuf
+
+	cmd.Run()
+
+	stdout := outbuf.String()
+	// println(stdout)
+	exeFiles = strings.Split(stdout, "\n")
+	return exeFiles
+}

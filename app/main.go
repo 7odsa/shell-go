@@ -30,10 +30,16 @@ func (bc *BellCompleter) Do(line []rune, pos int) ([][]rune, int) {
 
 func main() {
 
-	autoCompleter := readline.NewPrefixCompleter(
-		readline.PcItem("echo"),
+	allExe := utils.GetAllExecutableFiles()
+
+	allPrefixComp := []readline.PrefixCompleterInterface{readline.PcItem("echo"),
 		readline.PcItem("exit"),
-	)
+	}
+
+	for _, exe := range allExe {
+		allPrefixComp = append(allPrefixComp, readline.PcItem(exe))
+	}
+	autoCompleter := readline.NewPrefixCompleter(allPrefixComp...)
 
 	bellComp := &BellCompleter{AutoCompleter: autoCompleter}
 
