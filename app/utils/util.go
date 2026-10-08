@@ -115,6 +115,10 @@ func HandleRedirect(tokens []string, prompt string) bool {
 			indexOp = i
 			handleAppendStdout(tokens, indexOp)
 		}
+		if strings.Trim(s, " ") == "2>>" {
+			indexOp = i
+			handleAppendStderr(tokens, indexOp)
+		}
 		if strings.Trim(s, " ") == ">" || strings.Trim(s, " ") == "1>" {
 			indexOp = i
 			return handleRedirectStdout(tokens, indexOp)
@@ -129,6 +133,33 @@ func HandleRedirect(tokens []string, prompt string) bool {
 	}
 	return true
 
+}
+
+func handleAppendStderr(tokens []string, indexOp int) bool {
+	fileName := tokens[indexOp+1]
+	args := tokens[:indexOp]
+
+	file, err := os.OpenFile(fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+
+	cmd := exec.Command(args[0], args[1:]...)
+
+	if err != nil {
+		// println(" err wile creating the file")
+		// log.Fatal(err)
+		return false
+	}
+	defer file.Close()
+
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = file
+
+	err = cmd.Run()
+	// if err != nil {
+	// 	// println(" err while write into  the file")
+	// 	return false
+	// }
+
+	return true
 }
 
 func handleAppendStdout(tokens []string, indexOp int) bool {
