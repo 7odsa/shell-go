@@ -1,11 +1,11 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"os"
 	"strings"
 
+	"github.com/chzyer/readline"
 	"github.com/codecrafters-io/shell-starter-go/app/builtin"
 	"github.com/codecrafters-io/shell-starter-go/app/utils"
 	// "math/rand"
@@ -13,24 +13,39 @@ import (
 	// "time"
 )
 
-// Ensures gofmt doesn't remove the "fmt" import in stage 1 (feel free to remove this!)
-var _ = fmt.Print
 var builtIns = []string{"exit", "echo", "type", "pwd", "cd", "cat"}
 
 func main() {
 
-	reader := bufio.NewReader(os.Stdin)
+	autoCompleter := readline.NewPrefixCompleter(
+		readline.PcItem("echo"),
+		readline.PcItem("exit"),
+	)
+
+	reader, err := readline.NewEx(&readline.Config{
+		Prompt:       "$ ",
+		AutoComplete: autoCompleter,
+	})
+
+	if err != nil {
+		panic(err)
+	}
+
+	defer reader.Close()
+
 	for {
 
 		fmt.Print("$ ")
 
-		prompt, err := reader.ReadString('\n')
+		prompt, err := reader.Readline()
 
 		utils.HandleErr(err)
+
 		prompt = strings.TrimSpace(prompt)
 		if utils.IsEmptyPrompt(prompt) {
 			continue
 		}
+
 		var tokens []string = utils.HandleQuotes(prompt)
 
 		hasCommand(tokens, prompt)
