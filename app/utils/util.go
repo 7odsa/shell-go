@@ -306,6 +306,7 @@ func GetAllExecutableFiles() []string {
 
 	for _, dir := range filepath.SplitList(pathEnv) {
 		entries, err := os.ReadDir(dir)
+
 		if err != nil {
 			continue
 		}
