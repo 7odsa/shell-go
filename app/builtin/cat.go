@@ -10,7 +10,7 @@ import (
 
 func HandleCat(tokens []string, prompt string) {
 
-	if utils.HandleRedirectStdout(tokens, "") {
+	if utils.HandleRedirect(tokens, "") {
 		println(prompt)
 		return
 	}

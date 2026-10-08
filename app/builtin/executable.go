@@ -10,7 +10,7 @@ import (
 
 func HandleExecutable(tokens []string, prompt string) {
 
-	if utils.HandleRedirectStdout(tokens, "") {
+	if utils.HandleRedirect(tokens, "") {
 		return
 	}
 

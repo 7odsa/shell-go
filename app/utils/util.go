@@ -2,7 +2,6 @@ package utils
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"strings"
@@ -108,20 +107,27 @@ func HandleQuotes(prompt string) []string {
 	return res
 }
 
-func HandleRedirectStdout(tokens []string, prompt string) bool {
+func HandleRedirect(tokens []string, prompt string) bool {
 
 	indexOp := -1
 	for i, s := range tokens {
 		if strings.Trim(s, " ") == ">" || strings.Trim(s, " ") == "1>" {
 			indexOp = i
-			break
+			return handleRedirectStdout(tokens, indexOp)
+		} else if strings.Trim(s, " ") == "2>" {
+			indexOp = i
+			return handleRedirectStderr(tokens, indexOp)
 		}
 	}
 	if indexOp == -1 {
 		// println(" No  > sign")
 		return false
 	}
+	return true
 
+}
+
+func handleRedirectStderr(tokens []string, indexOp int) bool {
 	fileName := tokens[indexOp+1]
 	args := tokens[:indexOp]
 
@@ -130,7 +136,33 @@ func HandleRedirectStdout(tokens []string, prompt string) bool {
 	file, err := os.Create(fileName)
 	if err != nil {
 		// println(" err wile creating the file")
-		log.Fatal(err)
+		// log.Fatal(err)
+		return false
+	}
+	defer file.Close()
+
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = file
+
+	err = cmd.Run()
+	// if err != nil {
+	// 	// println(" err while write into  the file")
+	// 	return false
+	// }
+
+	return true
+}
+
+func handleRedirectStdout(tokens []string, indexOp int) bool {
+	fileName := tokens[indexOp+1]
+	args := tokens[:indexOp]
+
+	cmd := exec.Command(args[0], args[1:]...)
+
+	file, err := os.Create(fileName)
+	if err != nil {
+		// println(" err wile creating the file")
+		// log.Fatal(err)
 		return false
 	}
 	defer file.Close()
@@ -139,10 +171,10 @@ func HandleRedirectStdout(tokens []string, prompt string) bool {
 	cmd.Stderr = os.Stderr
 
 	err = cmd.Run()
-	if err != nil {
-		// println(" err while write into  the file")
-		return true
-	}
+	// if err != nil {
+	// 	// println(" err while write into  the file")
+	// 	return false
+	// }
 
 	return true
 }

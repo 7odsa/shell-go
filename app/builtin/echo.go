@@ -15,7 +15,7 @@ func HandleEcho(tokens []string, prompt string) {
 	// 	fmt.Println(tokens[i])
 	// }
 
-	if utils.HandleRedirectStdout(tokens, "") {
+	if utils.HandleRedirect(tokens, "") {
 		return
 	}
 
