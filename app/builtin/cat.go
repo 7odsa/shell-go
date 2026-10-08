@@ -26,7 +26,7 @@ func HandleCat(tokens []string, prompt string) {
 			continue
 		}
 
-		fmt.Print(string(content))
+		fmt.Println(string(content))
 	}
 
 }
