@@ -9,10 +9,7 @@ import (
 )
 
 func HandleCat(tokens []string, prompt string) {
-	if utils.IsOneWord(tokens) {
-		fmt.Println("")
-		return
-	}
+
 	if utils.HandleRedirectStdout(tokens, "") {
 		println(prompt)
 		return
