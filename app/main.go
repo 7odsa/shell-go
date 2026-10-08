@@ -67,9 +67,9 @@ func hasCommand(tokens []string, prompt string) bool {
 		builtin.HandleCd(tokens)
 		return true
 
-	case utils.IsExecutable(tokens, prompt):
-		builtin.HandleExecutable(tokens, prompt)
-		return true
+	// case utils.IsExecutable(tokens, prompt):
+	// 	builtin.HandleExecutable(tokens, prompt)
+	// 	return true
 	default:
 		fmt.Println(strings.Join(tokens, "") + ": command not found")
 		return false

@@ -15,11 +15,11 @@ func HandleEcho(tokens []string, prompt string) {
 	// 	fmt.Println(tokens[i])
 	// }
 
-	res := strings.Join(tokens, "")
-
-	if utils.HandleRedirectStdout(tokens, res) {
+	if utils.HandleRedirectStdout(tokens, "") {
 		return
 	}
+
+	res := strings.Join(tokens, "")
 
 	fmt.Println(res)
 

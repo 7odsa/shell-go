@@ -13,6 +13,10 @@ func HandleCat(tokens []string, prompt string) {
 		fmt.Println("")
 		return
 	}
+	if utils.HandleRedirectStdout(tokens, "") {
+		println(prompt)
+		return
+	}
 
 	for _, token := range tokens {
 		if strings.Trim(token, " ") == "" {

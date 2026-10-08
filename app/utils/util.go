@@ -122,11 +122,12 @@ func HandleRedirectStdout(tokens []string, prompt string) bool {
 	}
 
 	fileName := tokens[indexOp+1]
-	args := tokens[:indexOp-1]
+	args := tokens[:indexOp]
 
 	err := os.WriteFile(fileName, []byte(strings.Join(args, "")), 0644)
 	if err != nil {
 		fmt.Println(err)
+		return false
 	}
 	return true
 }
