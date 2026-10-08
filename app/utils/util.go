@@ -141,7 +141,6 @@ func HandleRedirectStdout(tokens []string, prompt string) bool {
 	err = cmd.Run()
 	if err != nil {
 		// println(" err while write into  the file")
-		log.Fatal(err)
 		return false
 	}
 
