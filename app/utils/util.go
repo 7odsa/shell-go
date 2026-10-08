@@ -113,7 +113,7 @@ func HandleRedirect(tokens []string, prompt string) bool {
 	for i, s := range tokens {
 		if strings.Trim(s, " ") == ">>" || strings.Trim(s, " ") == "1>>" {
 			indexOp = i
-
+			handleAppendStdout(tokens, indexOp)
 		}
 		if strings.Trim(s, " ") == ">" || strings.Trim(s, " ") == "1>" {
 			indexOp = i
@@ -135,13 +135,14 @@ func handleAppendStdout(tokens []string, indexOp int) bool {
 	fileName := tokens[indexOp+1]
 	args := tokens[:indexOp]
 
+	file, err := os.Create(fileName)
+
 	content, _ := os.ReadFile(fileName)
 
 	args = append(args, string(content))
 
 	cmd := exec.Command(args[0], args[1:]...)
 
-	file, err := os.Create(fileName)
 	if err != nil {
 		// println(" err wile creating the file")
 		// log.Fatal(err)
