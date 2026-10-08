@@ -118,6 +118,7 @@ func HandleRedirectStdout(tokens []string, prompt string) bool {
 		}
 	}
 	if indexOp == -1 {
+		// println(" No  > sign")
 		return false
 	}
 
@@ -128,6 +129,7 @@ func HandleRedirectStdout(tokens []string, prompt string) bool {
 
 	file, err := os.Create(fileName)
 	if err != nil {
+		// println(" err wile creating the file")
 		log.Fatal(err)
 		return false
 	}
@@ -138,6 +140,7 @@ func HandleRedirectStdout(tokens []string, prompt string) bool {
 
 	err = cmd.Run()
 	if err != nil {
+		// println(" err while write into  the file")
 		log.Fatal(err)
 		return false
 	}
