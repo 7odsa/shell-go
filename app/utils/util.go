@@ -2,11 +2,18 @@ package utils
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 )
+
+type Command struct {
+	exec   func(cmd Command, args []string)
+	Stdout io.Writer
+	Stderr io.Writer
+}
 
 func HandleQuotes(prompt string) []string {
 	var word string = ""

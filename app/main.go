@@ -1,114 +1,203 @@
+// package main
+
+// import (
+// 	"fmt"
+// 	"os"
+// 	"strings"
+
+// 	"github.com/chzyer/readline"
+// 	"github.com/codecrafters-io/shell-starter-go/app/builtin"
+// 	"github.com/codecrafters-io/shell-starter-go/app/utils"
+// )
+
+// var builtIns = []string{"exit", "echo", "type", "pwd", "cd", "cat"}
+
+// type BellCompleter struct {
+// 	readline.AutoCompleter
+// }
+
+// func (bc *BellCompleter) Do(line []rune, pos int) ([][]rune, int) {
+
+// 	newLine, length := bc.AutoCompleter.Do(line, pos)
+// 	if len(newLine) == 0 {
+// 		fmt.Print("\x07")
+// 		os.Stdout.Sync()
+// 	}
+// 	return newLine, length
+// }
+
+// func main() {
+
+// 	allExe := utils.GetAllExecutableFiles()
+
+// 	allPrefixComp := []readline.PrefixCompleterInterface{readline.PcItem("echo"),
+// 		readline.PcItem("exit"),
+// 	}
+
+// 	for _, exe := range allExe {
+// 		allPrefixComp = append(allPrefixComp, readline.PcItem(exe))
+// 	}
+// 	autoCompleter := readline.NewPrefixCompleter(allPrefixComp...)
+
+// 	bellComp := &BellCompleter{AutoCompleter: autoCompleter}
+
+// 	reader, err := readline.NewEx(&readline.Config{
+// 		Prompt:       "$ ",
+// 		AutoComplete: bellComp,
+// 	})
+
+// 	if err != nil {
+// 		panic(err)
+// 	}
+
+// 	defer reader.Close()
+
+// 	for {
+
+// 		fmt.Print("$ ")
+
+// 		prompt, err := reader.Readline()
+
+// 		utils.HandleErr(err)
+
+// 		prompt = strings.TrimSpace(prompt)
+// 		if utils.IsEmptyPrompt(prompt) {
+// 			continue
+// 		}
+
+// 		var tokens []string = utils.HandleQuotes(prompt)
+
+// 		hasCommand(tokens, prompt)
+// 	}
+
+// }
+
+// func hasCommand(tokens []string, prompt string) bool {
+// 	// if len(tokens) > 1 {
+// 	// 	tokens[1] = strings.TrimLeft(tokens[1], " ")
+
+// 	// }
+
+// 	switch {
+
+// 	case utils.IsBuiltIn(tokens[0], "exit"):
+// 		os.Exit(0)
+// 		return true
+// 	case utils.IsBuiltIn(tokens[0], "pwd"):
+// 		builtin.HandlePwd(tokens)
+// 		return true
+
+// 	case utils.IsBuiltIn(tokens[0], "echo"):
+// 		builtin.HandleEcho(tokens, strings.TrimLeft(strings.TrimSuffix(prompt, "echo"), " "))
+// 		return true
+// 	// case utils.IsBuiltIn(tokens[0], "cat"):
+// 	// 	builtin.HandleCat(tokens, strings.TrimLeft(strings.TrimSuffix(prompt, "cat"), " "))
+// 	// 	return true
+// 	case utils.IsBuiltIn(tokens[0], "type"):
+// 		builtin.HandleType(tokens, builtIns)
+// 		return true
+
+// 	case utils.IsBuiltIn(tokens[0], "cd"):
+// 		builtin.HandleCd(tokens)
+// 		return true
+
+// 	case utils.IsExecutable(tokens, prompt):
+// 		builtin.HandleExecutable(tokens, prompt)
+// 		return true
+// 	default:
+// 		fmt.Println(strings.Join(tokens, "") + ": command not found")
+// 		return false
+// 	}
+
+// }
+
 package main
 
 import (
+	"errors"
 	"fmt"
+	"io"
+	"log"
 	"os"
+	"os/exec"
 	"strings"
 
 	"github.com/chzyer/readline"
-	"github.com/codecrafters-io/shell-starter-go/app/builtin"
-	"github.com/codecrafters-io/shell-starter-go/app/utils"
-	// "math/rand"
-	// "sync"
-	// "time"
 )
 
-var builtIns = []string{"exit", "echo", "type", "pwd", "cd", "cat"}
-
-type BellCompleter struct {
-	readline.AutoCompleter
-}
-
-func (bc *BellCompleter) Do(line []rune, pos int) ([][]rune, int) {
-	newLine, length := bc.AutoCompleter.Do(line, pos)
-	if len(newLine) == 0 {
-		fmt.Print("\x07")
-		os.Stdout.Sync()
-	}
-	return newLine, length
-}
+const prompt = "$ "
 
 func main() {
-
-	allExe := utils.GetAllExecutableFiles()
-
-	allPrefixComp := []readline.PrefixCompleterInterface{readline.PcItem("echo"),
-		readline.PcItem("exit"),
-	}
-
-	for _, exe := range allExe {
-		allPrefixComp = append(allPrefixComp, readline.PcItem(exe))
-	}
-	autoCompleter := readline.NewPrefixCompleter(allPrefixComp...)
-
-	bellComp := &BellCompleter{AutoCompleter: autoCompleter}
-
-	reader, err := readline.NewEx(&readline.Config{
-		Prompt:       "$ ",
-		AutoComplete: bellComp,
+	rl, err := readline.NewEx(&readline.Config{
+		Prompt:       prompt,
+		AutoComplete: NewCustomCompleter(prompt),
+		HistoryFile:  "/tmp/readline.tmp",
+		HistoryLimit: 20,
 	})
-
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
-
-	defer reader.Close()
+	defer rl.Close()
+	rl.CaptureExitSignal()
 
 	for {
+		line, err := rl.Readline()
+		if err == readline.ErrInterrupt {
+			if len(line) == 0 {
+				break
+			} else {
+				continue
+			}
+		} else if err == io.EOF {
+			break
+		}
+		inputs := tokenize(strings.TrimSpace(line))
 
-		fmt.Print("$ ")
-
-		prompt, err := reader.Readline()
-
-		utils.HandleErr(err)
-
-		prompt = strings.TrimSpace(prompt)
-		if utils.IsEmptyPrompt(prompt) {
+		if len(inputs) == 0 {
 			continue
 		}
+		action := inputs[0]
+		args := inputs[1:]
 
-		var tokens []string = utils.HandleQuotes(prompt)
+		args, outFile, errFile, err := parseRedirect(args)
+		if err != nil {
+			fmt.Println("Error parsing redirect: ", err)
+			continue
+		}
+		stdout := os.Stdout
+		stderr := os.Stderr
+		if outFile != nil {
+			stdout = outFile
+		}
+		if errFile != nil {
+			stderr = errFile
+		}
 
-		hasCommand(tokens, prompt)
+		if cmd, isBuiltin := BuiltinCmds[action]; isBuiltin {
+			cmd.Stdout = stdout
+			cmd.Stderr = stderr
+			cmd.Run(args)
+		} else if _, err := exec.LookPath(action); err == nil {
+			cmd := exec.Command(action, args...)
+			cmd.Stdout = stdout
+			cmd.Stderr = stderr
+			if err := cmd.Run(); err != nil {
+				var exitErr *exec.ExitError
+				// Only print non-exit message
+				if isExit := errors.As(err, &exitErr); !isExit {
+					fmt.Fprintln(stderr, err)
+				}
+			}
+		} else {
+			fmt.Fprintln(os.Stderr, action+": command not found")
+		}
+
+		// Clean up opened file
+		if outFile != nil {
+			outFile.Close()
+		}
+		if errFile != nil {
+			errFile.Close()
+		}
 	}
-
-}
-
-func hasCommand(tokens []string, prompt string) bool {
-	// if len(tokens) > 1 {
-	// 	tokens[1] = strings.TrimLeft(tokens[1], " ")
-
-	// }
-
-	switch {
-
-	case utils.IsBuiltIn(tokens[0], "exit"):
-		os.Exit(0)
-		return true
-	case utils.IsBuiltIn(tokens[0], "pwd"):
-		builtin.HandlePwd(tokens)
-		return true
-
-	case utils.IsBuiltIn(tokens[0], "echo"):
-		builtin.HandleEcho(tokens, strings.TrimLeft(strings.TrimSuffix(prompt, "echo"), " "))
-		return true
-	// case utils.IsBuiltIn(tokens[0], "cat"):
-	// 	builtin.HandleCat(tokens, strings.TrimLeft(strings.TrimSuffix(prompt, "cat"), " "))
-	// 	return true
-	case utils.IsBuiltIn(tokens[0], "type"):
-		builtin.HandleType(tokens, builtIns)
-		return true
-
-	case utils.IsBuiltIn(tokens[0], "cd"):
-		builtin.HandleCd(tokens)
-		return true
-
-	case utils.IsExecutable(tokens, prompt):
-		builtin.HandleExecutable(tokens, prompt)
-		return true
-	default:
-		fmt.Println(strings.Join(tokens, "") + ": command not found")
-		return false
-	}
-
 }
