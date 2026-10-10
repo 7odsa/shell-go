@@ -81,7 +81,7 @@ func listCommands(prefix, pathEnv string) []string {
 
 func listFiles(prefix string) ([]string, string) {
 
-	dir, file := "", ""
+	dir, file := "", prefix
 	if strings.Contains(prefix, "/") {
 		dir, file = filepath.Split(prefix)
 
