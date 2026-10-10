@@ -47,6 +47,7 @@ func (c *BuiltinCompleter) Do(line []rune, pos int) ([][]rune, int) {
 	}
 
 	if common := commonPrefix(matches); len(common) > len(prefix) {
+
 		if isCommand || strings.Contains(common, ".") {
 			return suffixOf(common, prefix)
 		} else {
