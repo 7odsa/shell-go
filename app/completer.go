@@ -37,9 +37,30 @@ func (c *BuiltinCompleter) Do(line []rune, pos int) ([][]rune, int) {
 		c.lastTab = prefix
 		return c.ring()
 	}
+	common := longestCommonPrefix(matches)
+	if len(common) > len(prefix) {
+		return suffixOf(prefix, common)
+	}
 
 	fmt.Fprintf(readline.Stdout, "\r\n%s\r\n%s%s", strings.Join(matches, "  "), c.prompt, prefix)
 	return nil, 0
+}
+
+func longestCommonPrefix(matches []string) string {
+	first, last := matches[0], matches[len(matches)-1]
+
+	i := 0
+
+	for i := range len(first) {
+		if first[i] == last[i] {
+			i++
+		} else {
+			break
+		}
+	}
+
+	return first[0:i]
+
 }
 
 func (c *BuiltinCompleter) ring() ([][]rune, int) {
