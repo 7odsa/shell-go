@@ -109,7 +109,7 @@ func fileNames(dir string) []string {
 	if dir == "" {
 		dir = "."
 	}
-	dirEnt, _ := os.ReadDir(".")
+	dirEnt, _ := os.ReadDir(dir)
 
 	var names []string
 	for _, entry := range dirEnt {
