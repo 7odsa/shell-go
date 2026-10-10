@@ -26,7 +26,13 @@ func (c *BuiltinCompleter) Do(line []rune, pos int) ([][]rune, int) {
 	s := strings.Split(string(line[:pos]), " ")
 	prefix := s[len(s)-1]
 
-	matches := listCommands(prefix, os.Getenv("PATH"))
+	var matches []string
+
+	if len(s) <= 1 {
+		matches = listCommands(prefix, os.Getenv("PATH"))
+	} else {
+		matches, prefix = listFiles(prefix)
+	}
 
 	switch {
 	case len(matches) == 0:
@@ -66,11 +72,6 @@ func listCommands(prefix, pathEnv string) []string {
 		names[name] = struct{}{}
 	}
 
-	for _, name := range fileNames() {
-		names[name] = struct{}{}
-
-	}
-
 	matches := slices.DeleteFunc(slices.Collect(maps.Keys(names)), func(name string) bool {
 		return !strings.HasPrefix(name, prefix)
 	})
@@ -78,7 +79,36 @@ func listCommands(prefix, pathEnv string) []string {
 	return matches
 }
 
-func fileNames() []string {
+func listFiles(prefix string) ([]string, string) {
+
+	dir, file := "", ""
+	if strings.Contains(prefix, "/") {
+		dir, file = filepath.Split(prefix)
+
+		// fileInfo, err := os.Stat(dir)
+		// if err != nil || !fileInfo.IsDir() {
+		// 	return make([]string, 0), file
+		// }
+	}
+
+	names := map[string]struct{}{}
+
+	for _, name := range fileNames(dir) {
+		names[name] = struct{}{}
+	}
+
+	matches := slices.DeleteFunc(slices.Collect(maps.Keys(names)), func(name string) bool {
+		return !strings.HasPrefix(name, file)
+	})
+
+	slices.Sort(matches)
+	return matches, file
+}
+
+func fileNames(dir string) []string {
+	if dir == "" {
+		dir = "."
+	}
 	dirEnt, _ := os.ReadDir(".")
 
 	var names []string
