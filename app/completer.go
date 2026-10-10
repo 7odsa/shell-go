@@ -33,9 +33,8 @@ func (c *BuiltinCompleter) Do(line []rune, pos int) ([][]rune, int) {
 		return suffixOf(matches[0]+" ", prefix)
 	}
 
-	common := longestCommonPrefix(matches)
-	if len(common) > len(prefix) {
-		return suffixOf(prefix, common)
+	if common := commonPrefix(matches); len(common) > len(prefix) {
+		return suffixOf(common, prefix)
 	}
 
 	if c.lastTab != prefix {
@@ -45,23 +44,6 @@ func (c *BuiltinCompleter) Do(line []rune, pos int) ([][]rune, int) {
 
 	fmt.Fprintf(readline.Stdout, "\r\n%s\r\n%s%s", strings.Join(matches, "  "), c.prompt, prefix)
 	return nil, 0
-}
-
-func longestCommonPrefix(matches []string) string {
-	first, last := matches[0], matches[len(matches)-1]
-
-	i := 0
-
-	for i := range len(first) {
-		if first[i] == last[i] {
-			i++
-		} else {
-			break
-		}
-	}
-
-	return first[0:i]
-
 }
 
 func (c *BuiltinCompleter) ring() ([][]rune, int) {
@@ -105,4 +87,16 @@ func executableNames(pathEnv string) []string {
 		}
 	}
 	return names
+}
+
+func commonPrefix(sortedMatches []string) string {
+	first, last := sortedMatches[0], sortedMatches[len(sortedMatches)-1]
+	i := 0
+	for i = range len(first) {
+		if first[i] != last[i] {
+			break
+		}
+		i++
+	}
+	return first[:i]
 }
