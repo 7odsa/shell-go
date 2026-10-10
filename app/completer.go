@@ -27,10 +27,11 @@ func (c *BuiltinCompleter) Do(line []rune, pos int) ([][]rune, int) {
 	prefix := s[len(s)-1]
 
 	var matches []string
-
+	var isCommand bool = true
 	if len(s) <= 1 {
 		matches = listCommands(prefix, os.Getenv("PATH"))
 	} else {
+		isCommand = false
 		matches, prefix = listFiles(prefix)
 	}
 
@@ -38,11 +39,20 @@ func (c *BuiltinCompleter) Do(line []rune, pos int) ([][]rune, int) {
 	case len(matches) == 0:
 		return c.ring()
 	case len(matches) == 1:
-		return suffixOf(matches[0]+" ", prefix)
+		if isCommand || strings.Contains(matches[0], ".") {
+			return suffixOf(matches[0]+" ", prefix)
+		} else {
+			return suffixOf(matches[0]+"/", prefix)
+		}
 	}
 
 	if common := commonPrefix(matches); len(common) > len(prefix) {
-		return suffixOf(common, prefix)
+		if isCommand || strings.Contains(common, ".") {
+			return suffixOf(common, prefix)
+		} else {
+			return suffixOf(common+"/", prefix)
+		}
+
 	}
 
 	if c.lastTab != prefix {
@@ -84,11 +94,7 @@ func listFiles(prefix string) ([]string, string) {
 	dir, file := "", prefix
 	if strings.Contains(prefix, "/") {
 		dir, file = filepath.Split(prefix)
-
-		// fileInfo, err := os.Stat(dir)
-		// if err != nil || !fileInfo.IsDir() {
-		// 	return make([]string, 0), file
-		// }
+		// println("&&")
 	}
 
 	names := map[string]struct{}{}
