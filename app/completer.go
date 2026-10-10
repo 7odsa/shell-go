@@ -33,13 +33,14 @@ func (c *BuiltinCompleter) Do(line []rune, pos int) ([][]rune, int) {
 		return suffixOf(matches[0]+" ", prefix)
 	}
 
-	if c.lastTab != prefix {
-		c.lastTab = prefix
-		return c.ring()
-	}
 	common := longestCommonPrefix(matches)
 	if len(common) > len(prefix) {
 		return suffixOf(prefix, common)
+	}
+
+	if c.lastTab != prefix {
+		c.lastTab = prefix
+		return c.ring()
 	}
 
 	fmt.Fprintf(readline.Stdout, "\r\n%s\r\n%s%s", strings.Join(matches, "  "), c.prompt, prefix)
