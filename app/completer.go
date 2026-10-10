@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"maps"
 	"os"
 	"path/filepath"
@@ -23,9 +24,11 @@ func NewCustomCompleter(prompt string) *BuiltinCompleter {
 // Do prints the match list itself and returns nothing for readline to draw,
 // because readline's own menu renders below a redrawn prompt, not above it.
 func (c *BuiltinCompleter) Do(line []rune, pos int) ([][]rune, int) {
-	prefix := string(line[:pos])
+	s := strings.Split(string(line[:pos]), " ")
+	prefix := s[len(s)-1]
 
 	matches := listCommands(prefix, os.Getenv("PATH"))
+
 	switch {
 	case len(matches) == 0:
 		return c.ring()
@@ -42,7 +45,7 @@ func (c *BuiltinCompleter) Do(line []rune, pos int) ([][]rune, int) {
 		return c.ring()
 	}
 
-	fmt.Fprintf(readline.Stdout, "\r\n%s\r\n%s%s", strings.Join(matches, "  "), c.prompt, prefix)
+	fmt.Fprintf(readline.Stdout, "\r\n%s\r\n%s%s", strings.Join(matches, "  "), c.prompt, string(line[:pos]))
 	return nil, 0
 }
 
@@ -64,11 +67,31 @@ func listCommands(prefix, pathEnv string) []string {
 		names[name] = struct{}{}
 	}
 
+	for _, name := range fileNames() {
+		names[name] = struct{}{}
+
+	}
+
 	matches := slices.DeleteFunc(slices.Collect(maps.Keys(names)), func(name string) bool {
 		return !strings.HasPrefix(name, prefix)
 	})
 	slices.Sort(matches)
 	return matches
+}
+
+func fileNames() []string {
+	dirEnt, err := os.ReadDir(".")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var names []string
+	for _, entry := range dirEnt {
+		names = append(names, (entry.Name()))
+
+	}
+
+	return names
 }
 
 func executableNames(pathEnv string) []string {
