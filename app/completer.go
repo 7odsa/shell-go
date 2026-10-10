@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"maps"
 	"os"
 	"path/filepath"
@@ -80,10 +79,7 @@ func listCommands(prefix, pathEnv string) []string {
 }
 
 func fileNames() []string {
-	dirEnt, err := os.ReadDir(".")
-	if err != nil {
-		log.Fatal(err)
-	}
+	dirEnt, _ := os.ReadDir(".")
 
 	var names []string
 	for _, entry := range dirEnt {
