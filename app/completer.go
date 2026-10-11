@@ -33,7 +33,7 @@ func (c *BuiltinCompleter) Do(line []rune, pos int) ([][]rune, int) {
 
 		output, err := cmd.Output()
 		if err == nil {
-			return suffixOf(string(output), "")
+			return suffixOf(strings.TrimSpace(string(output))+" ", "")
 		}
 
 	}
