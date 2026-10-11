@@ -31,11 +31,23 @@ var BuiltinCmds = map[string]Command{
 }
 
 func handleComplete(cmd Command, args []string) {
-	flag, rest := args[0], strings.Join(args[1:], " ")
+	flag := args[0]
 
 	switch flag {
 	case "-p":
-		println("complete: " + rest + ": no completion specification")
+		command := args[len(args)-1]
+		if comp, isComp := compScripts[command]; isComp {
+			println("complete -C '" + comp + "' " + command)
+		} else {
+			println("complete: " + command + ": no completion specification")
+		}
+		// To Be Done
+	case "-C":
+		if len(args) < 3 {
+			return
+		}
+		completer, command := strings.Join(args[1:len(args)-1], " "), args[len(args)-1]
+		compScripts[command] = completer
 		// To Be Done
 	}
 }
