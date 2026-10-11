@@ -32,9 +32,10 @@ func (c *BuiltinCompleter) Do(line []rune, pos int) ([][]rune, int) {
 		cmd := exec.Command(compScrpt)
 
 		output, err := cmd.Output()
-		if err == nil {
-			return suffixOf(strings.TrimSpace(string(output))+" ", "")
+		if err != nil || string(output) == "" {
+			return c.ring()
 		}
+		return suffixOf(strings.TrimSpace(string(output))+" ", "")
 
 	}
 
