@@ -2,10 +2,10 @@ package main
 
 type Comp struct {
 	compScripts map[string]string
-	isCompleter func(comp Comp, word string) bool
+	isCompleter func(comp Comp, word string) (string, bool)
 }
 
-var comp Comp = Comp{compScripts: map[string]string{}, isCompleter: func(comp Comp, word string) bool {
-	_, isComp := comp.compScripts[word]
-	return isComp
+var comp Comp = Comp{compScripts: map[string]string{}, isCompleter: func(comp Comp, word string) (string, bool) {
+	compScrpt, isComp := comp.compScripts[word]
+	return compScrpt, isComp
 }}
