@@ -103,6 +103,9 @@ func listFiles(prefix string) ([]string, string) {
 	for _, name := range fileNames(dir) {
 		if !strings.Contains(name, ".") {
 			names[name+"/"] = struct{}{}
+		} else {
+			names[name] = struct{}{}
+
 		}
 	}
 
