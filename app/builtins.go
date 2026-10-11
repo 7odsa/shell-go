@@ -35,7 +35,7 @@ func handleComplete(cmd Command, args []string) {
 
 	switch flag {
 	case "-p":
-		println("complete: " + rest + ": no  completion specification")
+		println("complete: " + rest + ": no completion specification")
 		// To Be Done
 	}
 }
