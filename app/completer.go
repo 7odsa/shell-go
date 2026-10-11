@@ -42,7 +42,7 @@ func (c *BuiltinCompleter) Do(line []rune, pos int) ([][]rune, int) {
 		if isCommand || strings.Contains(matches[0], ".") {
 			return suffixOf(matches[0]+" ", prefix)
 		} else {
-			return suffixOf(matches[0]+"/", prefix)
+			return suffixOf(matches[0], prefix)
 		}
 	}
 
@@ -51,7 +51,7 @@ func (c *BuiltinCompleter) Do(line []rune, pos int) ([][]rune, int) {
 		if isCommand || strings.Contains(common, ".") {
 			return suffixOf(common, prefix)
 		} else {
-			return suffixOf(common+"/", prefix)
+			return suffixOf(common, prefix)
 		}
 
 	}
@@ -101,7 +101,9 @@ func listFiles(prefix string) ([]string, string) {
 	names := map[string]struct{}{}
 
 	for _, name := range fileNames(dir) {
-		names[name] = struct{}{}
+		if !strings.Contains(name, ".") {
+			names[name+"/"] = struct{}{}
+		}
 	}
 
 	matches := slices.DeleteFunc(slices.Collect(maps.Keys(names)), func(name string) bool {
