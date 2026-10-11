@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"maps"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -25,6 +26,23 @@ func NewCustomCompleter(prompt string) *BuiltinCompleter {
 func (c *BuiltinCompleter) Do(line []rune, pos int) ([][]rune, int) {
 	s := strings.Split(string(line[:pos]), " ")
 	prefix := s[len(s)-1]
+
+	if comp.isCompleter(comp, s[0]) {
+		if _, err := exec.LookPath(prefix); err == nil {
+			stdout := os.Stdout
+			stderr := os.Stderr
+
+			cmd := exec.Command(s[0])
+			cmd.Stdout = stdout
+			cmd.Stderr = stderr
+
+			err := cmd.Run()
+
+			if err != nil {
+				return suffixOf(stdout.Name(), "")
+			}
+		}
+	}
 
 	var matches []string
 	var isCommand bool = true

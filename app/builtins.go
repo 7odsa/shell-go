@@ -36,7 +36,7 @@ func handleComplete(cmd Command, args []string) {
 	switch flag {
 	case "-p":
 		command := args[len(args)-1]
-		if comp, isComp := compScripts[command]; isComp {
+		if comp, isComp := comp.compScripts[command]; isComp {
 			println("complete -C '" + comp + "' " + command)
 		} else {
 			println("complete: " + command + ": no completion specification")
@@ -47,7 +47,7 @@ func handleComplete(cmd Command, args []string) {
 			return
 		}
 		completer, command := strings.Join(args[1:len(args)-1], " "), args[len(args)-1]
-		compScripts[command] = completer
+		comp.compScripts[command] = completer
 		// To Be Done
 	}
 }
