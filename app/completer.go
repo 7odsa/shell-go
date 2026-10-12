@@ -32,11 +32,13 @@ func (c *BuiltinCompleter) Do(line []rune, pos int) ([][]rune, int) {
 	var isCommand bool = true
 
 	if compScrpt, isComp := comp.isCompleter(s[0]); isComp {
+		isCommand = false
+
 		compLine := string(line[:pos])
 		var compPoint int
 		compPoint = len(string(line[:pos]))
 
-		matches = listComp(comp, compLine, compPoint, s, compScrpt)
+		matches = listComp(compLine, compPoint, s, compScrpt)
 		if matches == nil {
 			return c.ring()
 		}
@@ -72,8 +74,8 @@ func (c *BuiltinCompleter) Do(line []rune, pos int) ([][]rune, int) {
 
 	}
 
-	if c.lastTab != prefix {
-		c.lastTab = prefix
+	if c.lastTab != string(line[:pos]) {
+		c.lastTab = string(line[:pos])
 		return c.ring()
 	}
 
@@ -90,7 +92,12 @@ func suffixOf(full, prefix string) ([][]rune, int) {
 	return [][]rune{[]rune(strings.TrimPrefix(full, prefix))}, len(prefix)
 }
 
-func listComp(comp Comp, compLine string, compPoint int, lineWords []string, compScrpt string) []string {
+func listComp(compLine string, compPoint int, lineWords []string, compScrpt string) []string {
+	if len(lineWords) <= 1 {
+		return nil
+	}
+
+	print("&&")
 
 	argv := lineWords
 	temp := argv[len(argv)-1]
@@ -109,7 +116,10 @@ func listComp(comp Comp, compLine string, compPoint int, lineWords []string, com
 		return nil
 	}
 
-	matches := strings.Split(string(output), "\n")
+	matches := strings.Split(strings.TrimSpace(string(output)), "\n")
+	slices.Sort(matches)
+
+	print(matches)
 
 	return matches
 }
