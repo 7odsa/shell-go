@@ -141,6 +141,8 @@ func main() {
 	rl.CaptureExitSignal()
 
 	for {
+		isbBackground := false
+
 		line, err := rl.Readline()
 		if err == readline.ErrInterrupt {
 			if len(line) == 0 {
@@ -156,8 +158,14 @@ func main() {
 		if len(inputs) == 0 {
 			continue
 		}
+
 		action := inputs[0]
 		args := inputs[1:]
+
+		if inputs[len(inputs)-1] == "&" && action != "echo" {
+			isbBackground = true
+			inputs = inputs[:len(inputs)-1]
+		}
 
 		args, outFile, errFile, err := parseRedirect(args)
 		if err != nil {
@@ -177,17 +185,32 @@ func main() {
 			cmd.Stdout = stdout
 			cmd.Stderr = stderr
 			cmd.Run(args)
+
 		} else if _, err := exec.LookPath(action); err == nil {
 			cmd := exec.Command(action, args...)
 			cmd.Stdout = stdout
 			cmd.Stderr = stderr
-			if err := cmd.Run(); err != nil {
-				var exitErr *exec.ExitError
-				// Only print non-exit message
-				if isExit := errors.As(err, &exitErr); !isExit {
-					fmt.Fprintln(stderr, err)
+			if !isbBackground {
+
+				if err := cmd.Run(); err != nil {
+					var exitErr *exec.ExitError
+					// Only print non-exit message
+					if isExit := errors.As(err, &exitErr); !isExit {
+						fmt.Fprintln(stderr, err)
+					}
+				}
+
+			} else {
+				if err := cmd.Start(); err != nil {
+					var exitErr *exec.ExitError
+					// Only print non-exit message
+					if isExit := errors.As(err, &exitErr); !isExit {
+						fmt.Fprintln(stderr, err)
+					}
+					print("[1] %d\n", cmd.Process.Pid)
 				}
 			}
+
 		} else {
 			fmt.Fprintln(os.Stderr, action+": command not found")
 		}
