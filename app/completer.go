@@ -29,7 +29,7 @@ func (c *BuiltinCompleter) Do(line []rune, pos int) ([][]rune, int) {
 
 	if compScrpt, isComp := comp.isCompleter(comp, s[0]); isComp {
 
-		cmd := exec.Command(compScrpt, prefix)
+		cmd := exec.Command(compScrpt, s...)
 
 		output, err := cmd.Output()
 		if err != nil || string(output) == "" {
