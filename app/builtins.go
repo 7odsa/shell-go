@@ -19,7 +19,7 @@ func (c Command) Run(args []string) {
 	c.exec(c, args)
 }
 
-var BuiltinNames = []string{"echo", "type", "pwd", "cd", "exit", "complete"}
+var BuiltinNames = []string{"echo", "type", "pwd", "cd", "exit", "complete", "jobs"}
 
 var BuiltinCmds = map[string]Command{
 	"echo":     {exec: handleEcho},
@@ -28,6 +28,11 @@ var BuiltinCmds = map[string]Command{
 	"cd":       {exec: handleCd},
 	"exit":     {exec: handleExit},
 	"complete": {exec: handleComplete},
+	"jobs":     {exec: handleJobs},
+}
+
+func handleJobs(cmd Command, args []string) {
+
 }
 
 func handleComplete(cmd Command, args []string) {
