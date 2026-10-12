@@ -97,29 +97,39 @@ func listComp(compLine string, compPoint int, lineWords []string, compScrpt stri
 		return nil
 	}
 
-	argv := slices.Clone(lineWords)
-	temp := argv[len(argv)-1]
-	argv[len(argv)-1] = argv[1]
-	argv[1] = temp
+	var argv []string = nil
+	if len(lineWords) >= 3 {
+		argv = slices.Clone(lineWords)
+		temp := argv[len(argv)-1]
+		argv[len(argv)-1] = argv[1]
+		argv[1] = temp
+	}
 
-	cmd := exec.Command(compScrpt, argv...)
+	var cmd *exec.Cmd
+	if argv == nil {
+		cmd = exec.Command(compScrpt, argv...)
+	} else {
+		cmd = exec.Command(compScrpt)
+
+	}
 
 	cmd.Env = append(os.Environ(),
 		"COMP_LINE="+compLine,
 		"COMP_POINT="+strconv.Itoa(compPoint),
 	)
 
-	output, _ := cmd.Output()
+	output, err := cmd.Output()
 
-	if string(output) == "" {
+	// print(len(output))
+
+	if err != nil {
 		return nil
 	}
 
 	matches := strings.Split(strings.TrimSpace(string(output)), "\n")
 	slices.Sort(matches)
 
-	print(len(matches))
-	print(matches)
+	// print(matches)
 
 	return matches
 }
