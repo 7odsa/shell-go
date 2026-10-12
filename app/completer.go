@@ -28,18 +28,23 @@ func (c *BuiltinCompleter) Do(line []rune, pos int) ([][]rune, int) {
 	prefix := s[len(s)-1]
 
 	if compScrpt, isComp := comp.isCompleter(comp, s[0]); isComp {
-		args := s
-		temp := args[len(args)-1]
-		args[len(args)-1] = args[1]
-		args[1] = temp
+		compLine := string(line[:pos])
+		compPoint := pos
+		compLine = compLine
+		compPoint = compPoint
 
-		cmd := exec.Command(compScrpt, args...)
+		argv := s
+		temp := argv[len(argv)-1]
+		argv[len(argv)-1] = argv[1]
+		argv[1] = temp
+
+		cmd := exec.Command(compScrpt, argv...)
 
 		output, err := cmd.Output()
 		if err != nil || string(output) == "" {
 			return c.ring()
 		}
-		return suffixOf(strings.TrimSpace(string(output))+" ", args[1])
+		return suffixOf(strings.TrimSpace(string(output))+" ", argv[1])
 
 	}
 
