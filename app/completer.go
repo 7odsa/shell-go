@@ -120,11 +120,12 @@ func listComp(compLine string, compPoint int, lineWords []string, compScrpt stri
 
 	output, err := cmd.Output()
 
-	// print(len(output))
-
 	if err != nil {
+		fmt.Fprintln(os.Stderr, "completer error:", err)
 		return nil
 	}
+
+	// fmt.Printf("output: %q\n", output)
 
 	matches := strings.Split(strings.TrimSpace(string(output)), "\n")
 	slices.Sort(matches)
