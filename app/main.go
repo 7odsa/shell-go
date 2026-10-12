@@ -164,7 +164,6 @@ func main() {
 		if inputs[len(inputs)-1] == "&" && action != "echo" {
 			isbBackground = true
 			inputs = inputs[:len(inputs)-1]
-			print(inputs[len(inputs)-1])
 		}
 		args := inputs[1:]
 
@@ -203,12 +202,9 @@ func main() {
 
 			} else {
 				if err := cmd.Start(); err != nil {
-					var exitErr *exec.ExitError
-					// Only print non-exit message
-					if isExit := errors.As(err, &exitErr); !isExit {
-						fmt.Fprintln(stderr, err)
-					}
-					print("[1] %d\n", cmd.Process.Pid)
+					fmt.Fprintln(stderr, err)
+				} else {
+					fmt.Printf("[1] %d\n", cmd.Process.Pid)
 				}
 			}
 
