@@ -112,7 +112,7 @@ func listComp(compLine string, compPoint int, words []string, script string) []s
 		return nil
 	}
 
-	text := strings.TrimLeft(string(out), " ")
+	text := strings.TrimSpace(string(out))
 	if text == "" {
 		return nil
 	}
