@@ -49,7 +49,15 @@ func handleComplete(cmd Command, args []string) {
 		completer, command := strings.Join(args[1:len(args)-1], " "), args[len(args)-1]
 		comp.compScripts[command] = completer
 		// To Be Done
+	case "-r":
+		if len(args) < 3 {
+			return
+		}
+		command := strings.TrimSpace(args[len(args)-1])
+		delete(comp.compScripts, command)
+		// To Be Done
 	}
+
 }
 
 func handleCd(cmd Command, args []string) {
