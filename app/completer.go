@@ -92,47 +92,73 @@ func suffixOf(full, prefix string) ([][]rune, int) {
 	return [][]rune{[]rune(strings.TrimPrefix(full, prefix))}, len(prefix)
 }
 
-func listComp(compLine string, compPoint int, lineWords []string, compScrpt string) []string {
-	if len(lineWords) <= 1 {
+func listComp(compLine string, compPoint int, words []string, script string) []string {
+	// if len(lineWords) <= 1 {
+	// 	return nil
+	// }
+
+	// var argv []string = nil
+	// if len(lineWords) >= 3 {
+	// 	argv = slices.Clone(lineWords)
+	// 	temp := argv[len(argv)-1]
+	// 	argv[len(argv)-1] = argv[1]
+	// 	argv[1] = temp
+	// }
+
+	// var cmd *exec.Cmd
+	// if argv != nil {
+	// 	cmd = exec.Command(compScrpt, argv...)
+	// } else {
+	// 	cmd = exec.Command(compScrpt)
+
+	// }
+
+	// cmd.Env = append(os.Environ(),
+	// 	"COMP_LINE="+compLine,
+	// 	"COMP_POINT="+strconv.Itoa(compPoint),
+	// )
+
+	// output, err := cmd.Output()
+
+	// if err != nil {
+	// 	// fmt.Fprintln(os.Stderr, "completer error:", err)
+	// 	return nil
+	// }
+
+	// // fmt.Printf("output: %q\n", output)
+
+	// matches := strings.Split(strings.TrimSpace(string(output)), "\n")
+	// slices.Sort(matches)
+
+	// // print(matches)
+
+	// return matches
+	if len(words) < 2 {
 		return nil
 	}
 
-	var argv []string = nil
-	if len(lineWords) >= 3 {
-		argv = slices.Clone(lineWords)
-		temp := argv[len(argv)-1]
-		argv[len(argv)-1] = argv[1]
-		argv[1] = temp
-	}
+	cur := words[len(words)-1]  // word being completed ("" for "git ")
+	prev := words[len(words)-2] // word before it ("git" for "git ")
 
-	var cmd *exec.Cmd
-	if argv != nil {
-		cmd = exec.Command(compScrpt, argv...)
-	} else {
-		cmd = exec.Command(compScrpt)
-
-	}
-
+	cmd := exec.Command(script, words[0], cur, prev)
 	cmd.Env = append(os.Environ(),
 		"COMP_LINE="+compLine,
 		"COMP_POINT="+strconv.Itoa(compPoint),
 	)
 
-	output, err := cmd.Output()
-
+	out, err := cmd.Output()
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "completer error:", err)
 		return nil
 	}
 
-	// fmt.Printf("output: %q\n", output)
+	text := strings.TrimSpace(string(out))
+	if text == "" {
+		return nil
+	}
 
-	matches := strings.Split(strings.TrimSpace(string(output)), "\n")
+	matches := strings.Split(text, "\n")
 	slices.Sort(matches)
-
-	// print(matches)
-
-	return matches
+	return slices.Compact(matches)
 }
 
 func listCommands(prefix, pathEnv string) []string {
