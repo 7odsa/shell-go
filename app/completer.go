@@ -119,7 +119,7 @@ func listComp(compLine string, compPoint int, words []string, script string) []s
 
 	matches := strings.Split(text, "\n")
 	slices.Sort(matches)
-	return slices.Compact(matches)
+	return (matches)
 }
 
 func listCommands(prefix, pathEnv string) []string {
