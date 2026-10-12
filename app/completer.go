@@ -106,7 +106,7 @@ func listComp(compLine string, compPoint int, lineWords []string, compScrpt stri
 	}
 
 	var cmd *exec.Cmd
-	if argv == nil {
+	if argv != nil {
 		cmd = exec.Command(compScrpt, argv...)
 	} else {
 		cmd = exec.Command(compScrpt)
