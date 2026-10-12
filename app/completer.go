@@ -28,10 +28,10 @@ func (c *BuiltinCompleter) Do(line []rune, pos int) ([][]rune, int) {
 	prefix := s[len(s)-1]
 
 	if compScrpt, isComp := comp.isCompleter(comp, s[0]); isComp {
-		COMP_LINE := string(line[:pos])
-		COMP_POINT := pos
+		compLine := string(line[:pos])
+		compPoint := pos
 
-		print(COMP_LINE, COMP_POINT)
+		print(compLine, compPoint)
 
 		argv := s
 		temp := argv[len(argv)-1]
@@ -39,6 +39,11 @@ func (c *BuiltinCompleter) Do(line []rune, pos int) ([][]rune, int) {
 		argv[1] = temp
 
 		cmd := exec.Command(compScrpt, argv...)
+
+		cmd.Env = append(os.Environ(),
+			"COMP_LINE="+compLine,
+			"COMP_POINT="+string(rune(compPoint)),
+		)
 
 		output, err := cmd.Output()
 		if err != nil || string(output) == "" {
