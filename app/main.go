@@ -160,12 +160,13 @@ func main() {
 		}
 
 		action := inputs[0]
-		args := inputs[1:]
 
 		if inputs[len(inputs)-1] == "&" && action != "echo" {
 			isbBackground = true
 			inputs = inputs[:len(inputs)-1]
+			print(inputs[len(inputs)-1])
 		}
+		args := inputs[1:]
 
 		args, outFile, errFile, err := parseRedirect(args)
 		if err != nil {
