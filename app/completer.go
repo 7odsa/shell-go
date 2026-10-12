@@ -30,9 +30,11 @@ func (c *BuiltinCompleter) Do(line []rune, pos int) ([][]rune, int) {
 
 	var matches []string
 	var isCommand bool = true
+	var isScript bool
 
 	if compScrpt, isComp := comp.isCompleter(s[0]); isComp {
 		isCommand = false
+		isScript = true
 
 		compLine := string(line[:pos])
 		var compPoint int
@@ -57,7 +59,7 @@ func (c *BuiltinCompleter) Do(line []rune, pos int) ([][]rune, int) {
 	case len(matches) == 0:
 		return c.ring()
 	case len(matches) == 1:
-		if isCommand || strings.Contains(matches[0], ".") {
+		if isCommand || isScript || strings.Contains(matches[0], ".") {
 			return suffixOf(matches[0]+" ", prefix)
 		} else {
 			return suffixOf(matches[0], prefix)
