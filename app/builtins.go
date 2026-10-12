@@ -31,6 +31,10 @@ var BuiltinCmds = map[string]Command{
 }
 
 func handleComplete(cmd Command, args []string) {
+	if len(args) == 0 {
+		return
+	}
+
 	flag := args[0]
 
 	switch flag {
@@ -41,7 +45,7 @@ func handleComplete(cmd Command, args []string) {
 		} else {
 			println("complete: " + command + ": no completion specification")
 		}
-		// To Be Done
+
 	case "-C":
 		if len(args) < 3 {
 			return
