@@ -28,37 +28,27 @@ func (c *BuiltinCompleter) Do(line []rune, pos int) ([][]rune, int) {
 	s := strings.Split(string(line[:pos]), " ")
 	prefix := s[len(s)-1]
 
-	if compScrpt, isComp := comp.isCompleter(comp, s[0]); isComp {
-		compLine := string(line[:pos])
-		compPoint := len(string(line[:pos]))
-
-		argv := s
-		temp := argv[len(argv)-1]
-		argv[len(argv)-1] = argv[1]
-		argv[1] = temp
-
-		cmd := exec.Command(compScrpt, argv...)
-
-		cmd.Env = append(os.Environ(),
-			"COMP_LINE="+compLine,
-			"COMP_POINT="+strconv.Itoa(compPoint),
-		)
-
-		output, err := cmd.Output()
-		if err != nil || string(output) == "" {
-			return c.ring()
-		}
-		return suffixOf(strings.TrimSpace(string(output))+" ", prefix)
-
-	}
-
 	var matches []string
 	var isCommand bool = true
-	if len(s) <= 1 {
-		matches = listCommands(prefix, os.Getenv("PATH"))
+
+	if compScrpt, isComp := comp.isCompleter(s[0]); isComp {
+		compLine := string(line[:pos])
+		var compPoint int
+		compPoint = len(string(line[:pos]))
+
+		matches = listComp(comp, compLine, compPoint, s, compScrpt)
+		if matches == nil {
+			return c.ring()
+		}
+
 	} else {
-		isCommand = false
-		matches, prefix = listFiles(prefix)
+
+		if len(s) <= 1 {
+			matches = listCommands(prefix, os.Getenv("PATH"))
+		} else {
+			isCommand = false
+			matches, prefix = listFiles(prefix)
+		}
 	}
 
 	switch {
@@ -98,6 +88,30 @@ func (c *BuiltinCompleter) ring() ([][]rune, int) {
 
 func suffixOf(full, prefix string) ([][]rune, int) {
 	return [][]rune{[]rune(strings.TrimPrefix(full, prefix))}, len(prefix)
+}
+
+func listComp(comp Comp, compLine string, compPoint int, lineWords []string, compScrpt string) []string {
+
+	argv := lineWords
+	temp := argv[len(argv)-1]
+	argv[len(argv)-1] = argv[1]
+	argv[1] = temp
+
+	cmd := exec.Command(compScrpt, argv...)
+
+	cmd.Env = append(os.Environ(),
+		"COMP_LINE="+compLine,
+		"COMP_POINT="+strconv.Itoa(compPoint),
+	)
+
+	output, err := cmd.Output()
+	if err != nil || string(output) == "" {
+		return nil
+	}
+
+	matches := strings.Split(string(output), "\n")
+
+	return matches
 }
 
 func listCommands(prefix, pathEnv string) []string {
