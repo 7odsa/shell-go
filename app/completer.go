@@ -28,10 +28,10 @@ func (c *BuiltinCompleter) Do(line []rune, pos int) ([][]rune, int) {
 	prefix := s[len(s)-1]
 
 	if compScrpt, isComp := comp.isCompleter(comp, s[0]); isComp {
-		compLine := string(line[:pos])
-		compPoint := pos
+		COMP_LINE := string(line[:pos])
+		COMP_POINT := pos
 
-		print(compLine, compPoint)
+		print(COMP_LINE, COMP_POINT)
 
 		argv := s
 		temp := argv[len(argv)-1]
