@@ -39,7 +39,7 @@ func (c *BuiltinCompleter) Do(line []rune, pos int) ([][]rune, int) {
 		if err != nil || string(output) == "" {
 			return c.ring()
 		}
-		return suffixOf(strings.TrimSpace(string(output))+" ", "")
+		return suffixOf(strings.TrimSpace(string(output))+" ", args[1])
 
 	}
 
