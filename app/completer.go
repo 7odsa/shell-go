@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"slices"
+	"strconv"
 	"strings"
 
 	"github.com/chzyer/readline"
@@ -42,7 +43,7 @@ func (c *BuiltinCompleter) Do(line []rune, pos int) ([][]rune, int) {
 
 		cmd.Env = append(os.Environ(),
 			"COMP_LINE="+compLine,
-			"COMP_POINT="+string(rune(compPoint)),
+			"COMP_POINT="+strconv.Itoa(compPoint),
 		)
 
 		output, err := cmd.Output()
