@@ -30,9 +30,7 @@ func (c *BuiltinCompleter) Do(line []rune, pos int) ([][]rune, int) {
 
 	if compScrpt, isComp := comp.isCompleter(comp, s[0]); isComp {
 		compLine := string(line[:pos])
-		compPoint := pos
-
-		print(compLine, compPoint)
+		compPoint := len(string(line[:pos]))
 
 		argv := s
 		temp := argv[len(argv)-1]
