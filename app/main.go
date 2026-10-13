@@ -120,7 +120,6 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"strconv"
 	"strings"
 
 	"github.com/chzyer/readline"
@@ -207,7 +206,6 @@ func main() {
 					job := &Job{number: len(jobs) + 1, cmd: cmd, done: make(chan struct{}), inputLine: line}
 					jobs = append(jobs, job)
 
-					jobInfo := "[" + strconv.Itoa(job.number) + "] <PID>" // jobInfo := "[" + strconv.Itoa(job.number) + "]+  " + chanState
 					// var chanState string
 					// select {
 					// case <-job.done:
@@ -220,11 +218,11 @@ func main() {
 					// 	jobInfo = jobInfo + " "
 					// }
 					// jobInfo = jobInfo + job.inputLine
-					fmt.Println(jobInfo)
 					go func() {
 						cmd.Wait()
 						close(job.done)
 					}()
+					fmt.Printf("[%d] %d\n", job.number, cmd.Process.Pid)
 
 				}
 			}
