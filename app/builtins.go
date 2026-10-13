@@ -68,7 +68,7 @@ func handleJobs(cmd Command, args []string) {
 		for i := 0; i < 27-sizeOfJobinfo; i++ {
 			jobInfo = jobInfo + " "
 		}
-		job.number -= numOfDeleted
+		// job.number -= numOfDeleted
 
 		if chanState == "Done" {
 			jobInfo = jobInfo + strings.TrimSuffix(job.inputLine, "&")
@@ -77,7 +77,6 @@ func handleJobs(cmd Command, args []string) {
 			i--
 		} else {
 			jobInfo = jobInfo + job.inputLine
-
 		}
 		fmt.Println(jobInfo)
 
