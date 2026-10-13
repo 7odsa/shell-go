@@ -62,20 +62,24 @@ func handleJobs(cmd Command, args []string) {
 		if i == len(jobs)-2 {
 			leadingChar = "-"
 		}
+
 		jobInfo := "[" + strconv.Itoa(job.number) + "]" + leadingChar + "  " + chanState
 		sizeOfJobinfo := len(jobInfo)
 		for i := 0; i < 27-sizeOfJobinfo; i++ {
 			jobInfo = jobInfo + " "
 		}
-		jobInfo = jobInfo + job.inputLine
-		fmt.Println(jobInfo)
 		job.number -= numOfDeleted
 
 		if chanState == "Done" {
+			jobInfo = jobInfo + strings.TrimSuffix(job.inputLine, "&")
 			jobs = slices.Delete(jobs, i, i+1)
 			numOfDeleted++
 			i--
+		} else {
+			jobInfo = jobInfo + job.inputLine
 		}
+		fmt.Println(jobInfo)
+
 	}
 
 }
