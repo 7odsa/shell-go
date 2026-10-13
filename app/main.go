@@ -220,7 +220,7 @@ func main() {
 					// 	chanState = "Running"
 					// }
 
-					jobInfo := "[" + strconv.Itoa(job.number) + "]+  " + strconv.Itoa(job.cmd.Process.Pid)
+					jobInfo := "[" + strconv.Itoa(job.number) + "]+  <PID>"
 					sizeOfJobinfo := len(jobInfo)
 					for i := 0; i < 27-sizeOfJobinfo; i++ {
 						jobInfo = jobInfo + " "
