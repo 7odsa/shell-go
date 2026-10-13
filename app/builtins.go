@@ -42,8 +42,12 @@ var BuiltinCmds = map[string]Command{
 }
 
 func handleJobs(cmd Command, args []string) {
-	numOfDeleted := 0
 
+	printJobs(false)
+
+}
+
+func printJobs(doneOnly bool) {
 	for i := 0; i < len(jobs); i++ {
 		job := jobs[i]
 
@@ -53,6 +57,9 @@ func handleJobs(cmd Command, args []string) {
 			chanState = "Done"
 		default:
 			chanState = "Running"
+		}
+		if chanState == "Running" && doneOnly {
+			continue
 		}
 
 		leadingChar := " "
@@ -73,7 +80,6 @@ func handleJobs(cmd Command, args []string) {
 		if chanState == "Done" {
 			jobInfo = jobInfo + strings.TrimSuffix(job.inputLine, "&")
 			jobs = slices.Delete(jobs, i, i+1)
-			numOfDeleted++
 			i--
 		} else {
 			jobInfo = jobInfo + job.inputLine
@@ -81,7 +87,6 @@ func handleJobs(cmd Command, args []string) {
 		fmt.Println(jobInfo)
 
 	}
-
 }
 
 func handleComplete(cmd Command, args []string) {

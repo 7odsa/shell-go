@@ -218,6 +218,8 @@ func main() {
 			fmt.Fprintln(os.Stderr, action+": command not found")
 		}
 
+		printJobs(true)
+
 		// Clean up opened file
 		if outFile != nil {
 			outFile.Close()
