@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"slices"
+	"strconv"
 	"strings"
 )
 
@@ -41,7 +42,24 @@ var BuiltinCmds = map[string]Command{
 }
 
 func handleJobs(cmd Command, args []string) {
+	for _, job := range jobs {
+		var chanState string
+		select {
+		case <-job.done:
+			chanState = "Done"
+		default:
+			chanState = "Running"
+		}
 
+		jobInfo := "[" + strconv.Itoa(job.number) + "]+  " + chanState
+		sizeOfJobinfo := len(jobInfo)
+		for i := 0; i < 27-sizeOfJobinfo; i++ {
+			jobInfo = jobInfo + " "
+		}
+		jobInfo = jobInfo + job.inputLine
+		fmt.Println(jobInfo)
+
+	}
 }
 
 func handleComplete(cmd Command, args []string) {

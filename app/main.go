@@ -120,7 +120,6 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"strconv"
 	"strings"
 
 	"github.com/chzyer/readline"
@@ -211,23 +210,7 @@ func main() {
 						cmd.Wait()
 						close(job.done)
 					}()
-
-					// var chanState string
-					// select {
-					// case <-job.done:
-					// 	chanState = "Done"
-					// default:
-					// 	chanState = "Running"
-					// }
-
-					jobInfo := "[" + strconv.Itoa(job.number) + "] <PID>"
-					sizeOfJobinfo := len(jobInfo)
-					for i := 0; i < 27-sizeOfJobinfo; i++ {
-						jobInfo = jobInfo + " "
-					}
-					// jobInfo = jobInfo + job.inputLine
-					fmt.Println(jobInfo)
-
+					fmt.Printf("[%d] %d\n", job.number, cmd.Process.Pid)
 				}
 			}
 
