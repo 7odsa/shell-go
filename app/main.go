@@ -211,20 +211,21 @@ func main() {
 						cmd.Wait()
 						close(job.done)
 					}()
-					var chanState string
-					select {
-					case <-job.done:
-						chanState = "Done"
-					default:
-						chanState = "Running"
-					}
 
-					jobInfo := "[" + strconv.Itoa(job.number) + "]+  " + chanState
+					// var chanState string
+					// select {
+					// case <-job.done:
+					// 	chanState = "Done"
+					// default:
+					// 	chanState = "Running"
+					// }
+
+					jobInfo := "[" + strconv.Itoa(job.number) + "]+  " + strconv.Itoa(job.cmd.Process.Pid)
 					sizeOfJobinfo := len(jobInfo)
 					for i := 0; i < 27-sizeOfJobinfo; i++ {
 						jobInfo = jobInfo + " "
 					}
-					jobInfo = jobInfo + job.inputLine
+					// jobInfo = jobInfo + job.inputLine
 					fmt.Println(jobInfo)
 
 				}
