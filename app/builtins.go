@@ -42,7 +42,7 @@ var BuiltinCmds = map[string]Command{
 }
 
 func handleJobs(cmd Command, args []string) {
-	for _, job := range jobs {
+	for i, job := range jobs {
 		var chanState string
 		select {
 		case <-job.done:
@@ -51,7 +51,14 @@ func handleJobs(cmd Command, args []string) {
 			chanState = "Running"
 		}
 
-		jobInfo := "[" + strconv.Itoa(job.number) + "]+  " + chanState
+		leadingChar := " "
+		if i == len(jobs)-1 {
+			leadingChar = "+"
+		}
+		if i == len(jobs)-2 {
+			leadingChar = "-"
+		}
+		jobInfo := "[" + strconv.Itoa(job.number) + "]" + leadingChar + "  " + chanState
 		sizeOfJobinfo := len(jobInfo)
 		for i := 0; i < 27-sizeOfJobinfo; i++ {
 			jobInfo = jobInfo + " "
