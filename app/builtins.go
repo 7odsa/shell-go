@@ -15,6 +15,15 @@ type Command struct {
 	Stderr io.Writer
 }
 
+type Job struct {
+	number    int
+	cmd       *exec.Cmd
+	done      chan struct{}
+	inputLine string
+}
+
+var jobs []*Job
+
 func (c Command) Run(args []string) {
 	c.exec(c, args)
 }

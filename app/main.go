@@ -120,6 +120,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 
 	"github.com/chzyer/readline"
@@ -160,7 +161,6 @@ func main() {
 		}
 
 		action := inputs[0]
-
 		if inputs[len(inputs)-1] == "&" && action != "echo" {
 			isbBackground = true
 			inputs = inputs[:len(inputs)-1]
@@ -204,7 +204,29 @@ func main() {
 				if err := cmd.Start(); err != nil {
 					fmt.Fprintln(stderr, err)
 				} else {
-					fmt.Printf("[1] %d\n", cmd.Process.Pid)
+					job := &Job{number: len(jobs) + 1, cmd: cmd, done: make(chan struct{}), inputLine: line}
+					jobs = append(jobs, job)
+
+					var chanState string
+					select {
+					case <-job.done:
+						chanState = "Done"
+					default:
+						chanState = "Running"
+					}
+
+					jobInfo := "[" + strconv.Itoa(job.number) + "]+  " + chanState
+					sizeOfJobinfo := len(jobInfo)
+					for i := 0; i < 27-sizeOfJobinfo; i++ {
+						jobInfo = jobInfo + " "
+					}
+					jobInfo = jobInfo + job.inputLine
+					fmt.Println(jobInfo)
+					go func() {
+						cmd.Wait()
+						close(job.done)
+					}()
+
 				}
 			}
 
