@@ -77,6 +77,7 @@ func handleJobs(cmd Command, args []string) {
 			i--
 		} else {
 			jobInfo = jobInfo + job.inputLine
+
 		}
 		fmt.Println(jobInfo)
 
