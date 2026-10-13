@@ -207,15 +207,14 @@ func main() {
 					job := &Job{number: len(jobs) + 1, cmd: cmd, done: make(chan struct{}), inputLine: line}
 					jobs = append(jobs, job)
 
-					select {
-					case <-job.done:
-						chanState = "Done"
-					default:
-						chanState = "Running"
-					}
-
 					jobInfo := "[" + strconv.Itoa(job.number) + "]+ <PID>" // jobInfo := "[" + strconv.Itoa(job.number) + "]+  " + chanState
 					// var chanState string
+					// select {
+					// case <-job.done:
+					// 	chanState = "Done"
+					// default:
+					// 	chanState = "Running"
+					// }
 					// sizeOfJobinfo := len(jobInfo)
 					// for i := 0; i < 27-sizeOfJobinfo; i++ {
 					// 	jobInfo = jobInfo + " "
