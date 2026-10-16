@@ -142,6 +142,7 @@ func main() {
 	rl.CaptureExitSignal()
 
 	for {
+		isBackground := false
 
 		line, err := rl.Readline()
 		if err == readline.ErrInterrupt {
@@ -159,72 +160,10 @@ func main() {
 			continue
 		}
 
-		// FROM HERE WE WILL CHECK IF THERE IS | OR |& AND IF ANY OF THEM IS THERE WE WILL GET THE STDOUT FROM THE FIRST COMMAND
-		// AND PASS IT AS A STDIN TO THE SECCOND COMMAND
-		command := Command{}
-		command.stdin = os.Stdin
-		command.Stdout = os.Stdout
-		command.handleCommand(inputs, line)
-
-		printJobs(true)
-	}
-}
-
-func (command *Command) handleCommand(inputs []string, line string) {
-	isBackground := false
-
-	if i := slices.Index(inputs, "|"); i != -1 {
-
-		r, w, err := os.Pipe()
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			return
+		if slices.Contains(inputs, "|") {
+			runPipeline(inputs)
+			continue
 		}
-
-		leftInputs := inputs[:i]
-		rightInputs := inputs[i+1:]
-
-		if len(leftInputs) == 0 || len(rightInputs) == 0 {
-			r.Close()
-			w.Close()
-			fmt.Fprintln(os.Stderr, "invalid pipeline")
-			return
-		}
-
-		leftCmd := exec.Command(leftInputs[0], leftInputs[1:]...)
-		leftCmd.Stdin = command.stdin
-		leftCmd.Stdout = w
-		leftCmd.Stderr = os.Stderr
-
-		rightCmd := exec.Command(rightInputs[0], rightInputs[1:]...)
-		rightCmd.Stdin = r
-		rightCmd.Stdout = command.Stdout
-		rightCmd.Stderr = os.Stderr
-
-		if err := leftCmd.Start(); err != nil {
-			r.Close()
-			w.Close()
-			fmt.Fprintln(os.Stderr, err)
-			return
-		}
-
-		if err := rightCmd.Start(); err != nil {
-			w.Close()
-			r.Close()
-			_ = leftCmd.Wait()
-			fmt.Fprintln(os.Stderr, err)
-			return
-		}
-
-		_ = w.Close()
-		_ = r.Close()
-
-		leftCmd.Wait()
-		rightCmd.Wait()
-
-		return
-
-	} else {
 
 		action := inputs[0]
 		if inputs[len(inputs)-1] == "&" && action != "echo" {
@@ -236,31 +175,26 @@ func (command *Command) handleCommand(inputs []string, line string) {
 		args, outFile, errFile, err := parseRedirect(args)
 		if err != nil {
 			fmt.Println("Error parsing redirect: ", err)
-			return
+			continue
 		}
-
+		stdout := os.Stdout
+		stderr := os.Stderr
 		if outFile != nil {
-			command.Stdout = outFile
-		} else if !slices.Equal(args, inputs[1:]) {
-			fmt.Println(action + ": " + args[len(args)-1] + ": No such file or directory")
-			return
+			stdout = outFile
 		}
-
 		if errFile != nil {
-			command.Stderr = errFile
+			stderr = errFile
 		}
 
 		if cmd, isBuiltin := BuiltinCmds[action]; isBuiltin {
-			cmd.Stdout = command.Stdout
-			cmd.Stderr = io.MultiWriter(command.Stderr, os.Stderr)
-			cmd.stdin = command.stdin
+			cmd.Stdout = stdout
+			cmd.Stderr = stderr
 			cmd.Run(args)
 
 		} else if _, err := exec.LookPath(action); err == nil {
 			cmd := exec.Command(action, args...)
-			cmd.Stdout = command.Stdout
-			cmd.Stderr = io.MultiWriter(command.Stderr, os.Stderr)
-			cmd.Stdin = command.stdin
+			cmd.Stdout = stdout
+			cmd.Stderr = stderr
 
 			if !isBackground {
 
@@ -268,13 +202,13 @@ func (command *Command) handleCommand(inputs []string, line string) {
 					var exitErr *exec.ExitError
 					// Only print non-exit message
 					if isExit := errors.As(err, &exitErr); !isExit {
-						fmt.Fprintln(command.Stderr, err)
+						fmt.Fprintln(stderr, err)
 					}
 				}
 
 			} else {
 				if err := cmd.Start(); err != nil {
-					fmt.Fprintln(command.Stderr, err)
+					fmt.Fprintln(stderr, err)
 				} else {
 					job := &Job{number: len(jobs) + 1, cmd: cmd, done: make(chan struct{}), inputLine: line}
 					jobs = append(jobs, job)
@@ -291,6 +225,8 @@ func (command *Command) handleCommand(inputs []string, line string) {
 			fmt.Fprintln(os.Stderr, action+": command not found")
 		}
 
+		printJobs(true)
+
 		// Clean up opened file
 		if outFile != nil {
 			outFile.Close()
@@ -298,5 +234,134 @@ func (command *Command) handleCommand(inputs []string, line string) {
 		if errFile != nil {
 			errFile.Close()
 		}
+	}
+}
+
+func runPipeline(inputs []string) bool {
+	// Find the pipe operator.
+	pipeIndex := -1
+
+	for i, token := range inputs {
+		if token == "|" {
+			if pipeIndex != -1 {
+				fmt.Fprintln(os.Stderr, "multiple pipes are not supported yet")
+				return true
+			}
+			pipeIndex = i
+		}
+	}
+
+	// No pipeline: let the normal command handler run.
+	if pipeIndex == -1 {
+		return false
+	}
+
+	// Validate both sides.
+	if pipeIndex == 0 || pipeIndex == len(inputs)-1 {
+		fmt.Fprintln(os.Stderr, "invalid pipeline")
+		return true
+	}
+
+	left := inputs[:pipeIndex]
+	right := inputs[pipeIndex+1:]
+
+	// Parse redirections independently for each command.
+	leftArgs, leftOut, leftErr, err := parseRedirect(left[1:])
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Error parsing redirect:", err)
+		return true
+	}
+
+	rightArgs, rightOut, rightErr, err := parseRedirect(right[1:])
+	if err != nil {
+		closeFile(leftOut)
+		closeFile(leftErr)
+		fmt.Fprintln(os.Stderr, "Error parsing redirect:", err)
+		return true
+	}
+
+	// Create the connection between the processes.
+	r, w, err := os.Pipe()
+	if err != nil {
+		closeFile(leftOut)
+		closeFile(leftErr)
+		closeFile(rightOut)
+		closeFile(rightErr)
+		fmt.Fprintln(os.Stderr, err)
+		return true
+	}
+
+	defer r.Close()
+	defer w.Close()
+
+	// Set up the left command.
+	leftCmd := exec.Command(left[0], leftArgs...)
+	leftCmd.Stdout = w
+	leftCmd.Stderr = os.Stderr
+
+	if leftOut != nil {
+		leftCmd.Stdout = leftOut
+	}
+	if leftErr != nil {
+		leftCmd.Stderr = leftErr
+	}
+
+	// Set up the right command.
+	rightCmd := exec.Command(right[0], rightArgs...)
+	rightCmd.Stdin = r
+	rightCmd.Stdout = os.Stdout
+	rightCmd.Stderr = os.Stderr
+
+	if rightOut != nil {
+		rightCmd.Stdout = rightOut
+	}
+	if rightErr != nil {
+		rightCmd.Stderr = rightErr
+	}
+
+	defer closeFile(leftOut)
+	defer closeFile(leftErr)
+	defer closeFile(rightOut)
+	defer closeFile(rightErr)
+
+	// Start the left process first.
+	if err := leftCmd.Start(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return true
+	}
+
+	// Start the right process without waiting for the left.
+	if err := rightCmd.Start(); err != nil {
+		_ = w.Close()
+		_ = r.Close()
+		_ = leftCmd.Wait()
+		fmt.Fprintln(os.Stderr, err)
+		return true
+	}
+
+	// The parent must release its copies of the pipe handles.
+	// Otherwise, the reader might never receive EOF.
+	_ = w.Close()
+	_ = r.Close()
+
+	// Wait for both processes.
+	leftErrWait := leftCmd.Wait()
+	rightErrWait := rightCmd.Wait()
+
+	// Child processes normally print their own errors.
+	// Don't print exec.ExitError again.
+	for _, waitErr := range []error{leftErrWait, rightErrWait} {
+		var exitErr *exec.ExitError
+		if waitErr != nil && !errors.As(waitErr, &exitErr) {
+			fmt.Fprintln(os.Stderr, waitErr)
+		}
+	}
+
+	return true
+}
+
+func closeFile(file *os.File) {
+	if file != nil {
+		_ = file.Close()
 	}
 }
