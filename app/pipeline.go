@@ -1,7 +1,9 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"strings"
@@ -43,133 +45,82 @@ func hasPipe(inputs []string) bool {
 }
 
 func runPipeline(inputs []string) error {
-
 	commands, err := splitPipeline(inputs)
 	if err != nil {
 		return err
 	}
 
-	n := len(commands)
-	if n == 1 {
-		return nil
+	// Each pipe connects one command's output to the next command's input.
+	readers := make([]*io.PipeReader, len(commands)-1)
+	writers := make([]*io.PipeWriter, len(commands)-1)
+
+	for i := range readers {
+		readers[i], writers[i] = io.Pipe()
 	}
 
-	type stage struct {
-		cmd     *exec.Cmd
-		builtin bool
-	}
+	errs := make(chan error, len(commands))
 
-	pipes := make([][2]*os.File, n-1)
-
-	for i := range pipes {
-		r, w, err := os.Pipe()
-		if err != nil {
-			for j := 0; j < i; j++ {
-				pipes[j][0].Close()
-				pipes[j][1].Close()
-			}
-			return err
-		}
-		pipes[i] = [2]*os.File{r, w}
-	}
-
-	closePipes := func() {
-		for _, p := range pipes {
-			p[0].Close()
-			p[1].Close()
-		}
-	}
-
-	stages := make([]stage, n)
-	errs := make(chan error, n)
-
-	// Configure and start external commands first.
 	for i, tokens := range commands {
-		if _, ok := BuiltinCmds[tokens[0]]; ok {
-			stages[i].builtin = true
-			continue
-		}
-
-		path, err := exec.LookPath(tokens[0])
-		if err != nil {
-			closePipes()
-			return fmt.Errorf("%s: command not found", tokens[0])
-		}
-
-		cmd := exec.Command(path, tokens[1:]...)
-		cmd.Stdin = os.Stdin
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-
-		if i > 0 {
-			cmd.Stdin = pipes[i-1][0]
-		}
-		if i < n-1 {
-			cmd.Stdout = pipes[i][1]
-		}
-
-		if err := cmd.Start(); err != nil {
-			closePipes()
-			return err
-		}
-
-		stages[i].cmd = cmd
-	}
-
-	// Run built-ins concurrently, using their own pipe endpoints.
-	for i, tokens := range commands {
-		if !stages[i].builtin {
-			continue
-		}
-
 		i, tokens := i, tokens
 
 		go func() {
-			cmd := BuiltinCmds[tokens[0]]
-			cmd.stdin = os.Stdin
-			cmd.Stdout = os.Stdout
+			var stdin io.Reader = os.Stdin
+			var stdout io.Writer = os.Stdout
+
+			// Every command except the first reads from the previous pipe.
+			if i > 0 {
+				stdin = readers[i-1]
+				defer readers[i-1].Close()
+			}
+
+			// Every command except the last writes to the next pipe.
+			if i < len(commands)-1 {
+				stdout = writers[i]
+				defer writers[i].Close()
+			}
+
+			action := tokens[0]
+			args := tokens[1:]
+
+			if builtin, ok := BuiltinCmds[action]; ok {
+				// Copy the value so stream configuration doesn't modify
+				// the shared Command stored in BuiltinCmds.
+				cmd := builtin
+				cmd.stdin = stdin
+				cmd.Stdout = stdout
+				cmd.Stderr = os.Stderr
+				cmd.Run(args)
+
+				errs <- nil
+				return
+			}
+
+			// Check PATH so an invalid command gets a shell-like message.
+			path, err := exec.LookPath(action)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, action+": command not found")
+				errs <- nil
+				return
+			}
+
+			cmd := exec.Command(path, args...)
+			cmd.Stdin = stdin
+			cmd.Stdout = stdout
 			cmd.Stderr = os.Stderr
 
-			if i > 0 {
-				cmd.stdin = pipes[i-1][0]
-			}
-			if i < n-1 {
-				cmd.Stdout = pipes[i][1]
-			}
+			err = cmd.Run()
 
-			cmd.Run(tokens[1:])
-
-			// Close the endpoint owned by this built-in after it returns.
-			if i > 0 {
-				pipes[i-1][0].Close()
-			}
-			if i < n-1 {
-				pipes[i][1].Close()
+			var exitErr *exec.ExitError
+			if err != nil && !errors.As(err, &exitErr) {
+				fmt.Fprintln(os.Stderr, err)
 			}
 
 			errs <- nil
 		}()
 	}
 
-	// The parent must close its copies so readers can receive EOF.
-	// Child processes and built-in goroutines retain their assigned endpoints.
-	closePipes()
-
-	// Wait for all external processes and built-ins.
-	for i := range stages {
-		if stages[i].builtin {
-			continue
-		}
-		errs <- stages[i].cmd.Wait()
-	}
-
-	builtinCount := 0
-	for _, s := range stages {
-		if s.builtin {
-			builtinCount++
-		}
-	}
-	for i := 0; i < builtinCount; i++ {
+	// Wait until every stage has finished.
+	for range commands {
 		<-errs
 	}
 
