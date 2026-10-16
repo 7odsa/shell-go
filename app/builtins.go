@@ -14,7 +14,7 @@ type Command struct {
 	exec   func(cmd Command, args []string)
 	Stdout io.Writer
 	Stderr io.Writer
-	stdin  io.Writer
+	stdin  io.Reader
 }
 
 type Job struct {

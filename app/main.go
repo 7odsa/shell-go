@@ -164,13 +164,13 @@ func main() {
 		command := Command{}
 		command.stdin = os.Stdin
 		command.Stdout = os.Stdout
-		command.handleCommand(inputs, line, false)
+		command.handleCommand(inputs, line)
 
 		printJobs(true)
 	}
 }
 
-func (command *Command) handleCommand(inputs []string, line string, isPipe bool) {
+func (command *Command) handleCommand(inputs []string, line string) {
 	isBackground := false
 
 	if i := slices.Index(inputs, "|"); i != -1 {
@@ -178,11 +178,16 @@ func (command *Command) handleCommand(inputs []string, line string, isPipe bool)
 		lCommand := Command{}
 		lCommand.stdin = command.stdin
 		lCommand.Stdout = w
-		lCommand.handleCommand(inputs[:i], line, true)
+
 		rCommand := Command{}
 		rCommand.stdin = r
 		rCommand.Stdout = command.Stdout
-		rCommand.handleCommand(inputs[i+1:], line, false)
+
+		lCommand.handleCommand(inputs[:i], line)
+		rCommand.handleCommand(inputs[i+1:], line)
+
+		w.Close()
+		r.Close()
 
 	} else {
 
@@ -209,16 +214,18 @@ func (command *Command) handleCommand(inputs []string, line string, isPipe bool)
 		if cmd, isBuiltin := BuiltinCmds[action]; isBuiltin {
 			cmd.Stdout = command.Stdout
 			cmd.Stderr = command.Stderr
+			cmd.stdin = command.stdin
 			cmd.Run(args)
 
 		} else if _, err := exec.LookPath(action); err == nil {
 			cmd := exec.Command(action, args...)
 			cmd.Stdout = command.Stdout
 			cmd.Stderr = command.Stderr
+			cmd.Stdin = command.stdin
 
 			if !isBackground {
 
-				if err := cmd.Run(); err != nil {
+				if err := cmd.Start(); err != nil {
 					var exitErr *exec.ExitError
 					// Only print non-exit message
 					if isExit := errors.As(err, &exitErr); !isExit {
