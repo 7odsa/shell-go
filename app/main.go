@@ -248,13 +248,14 @@ func (command *Command) handleCommand(inputs []string, line string) {
 
 		if cmd, isBuiltin := BuiltinCmds[action]; isBuiltin {
 			cmd.Stdout = command.Stdout
+			cmd.Stderr = io.MultiWriter(command.Stderr, os.Stderr)
 			cmd.stdin = command.stdin
 			cmd.Run(args)
 
 		} else if _, err := exec.LookPath(action); err == nil {
 			cmd := exec.Command(action, args...)
 			cmd.Stdout = command.Stdout
-			cmd.Stderr = command.Stderr
+			cmd.Stderr = io.MultiWriter(command.Stderr, os.Stderr)
 			cmd.Stdin = command.stdin
 
 			if !isBackground {
