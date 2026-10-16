@@ -260,7 +260,7 @@ func (command *Command) handleCommand(inputs []string, line string) {
 
 			if !isBackground {
 
-				if err := cmd.Start(); err != nil {
+				if err := cmd.Run(); err != nil {
 					var exitErr *exec.ExitError
 					// Only print non-exit message
 					if isExit := errors.As(err, &exitErr); !isExit {
