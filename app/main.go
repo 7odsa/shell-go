@@ -241,7 +241,11 @@ func (command *Command) handleCommand(inputs []string, line string) {
 
 		if outFile != nil {
 			command.Stdout = outFile
+		} else if !slices.Equal(args, inputs[1:]) {
+			fmt.Println(action + ": " + args[len(args)-1] + ": No such file or directory")
+			return
 		}
+
 		if errFile != nil {
 			command.Stderr = errFile
 		}
