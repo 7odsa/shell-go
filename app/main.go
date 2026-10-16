@@ -114,6 +114,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -170,8 +171,10 @@ func main() {
 }
 
 func (command *Command) handleCommand(inputs []string, line string) {
+	isBackground := false
 
 	if i := slices.Index(inputs, "|"); i != -1 {
+
 		r, w, err := os.Pipe()
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
@@ -188,7 +191,6 @@ func (command *Command) handleCommand(inputs []string, line string) {
 			return
 		}
 
-		// For now, support external commands in pipelines.
 		leftCmd := exec.Command(leftInputs[0], leftInputs[1:]...)
 		leftCmd.Stdin = command.stdin
 		leftCmd.Stdout = w
@@ -199,7 +201,6 @@ func (command *Command) handleCommand(inputs []string, line string) {
 		rightCmd.Stdout = command.Stdout
 		rightCmd.Stderr = os.Stderr
 
-		// Start the left process first.
 		if err := leftCmd.Start(); err != nil {
 			r.Close()
 			w.Close()
@@ -207,7 +208,6 @@ func (command *Command) handleCommand(inputs []string, line string) {
 			return
 		}
 
-		// Start the right process before waiting for the left.
 		if err := rightCmd.Start(); err != nil {
 			w.Close()
 			r.Close()
@@ -216,20 +216,83 @@ func (command *Command) handleCommand(inputs []string, line string) {
 			return
 		}
 
-		// Close the parent's copies so EOF can reach the reader.
 		_ = w.Close()
 		_ = r.Close()
 
-		// Foreground pipeline: wait for both processes.
-		leftErr := leftCmd.Wait()
-		rightErr := rightCmd.Wait()
-
-		// Non-zero exit statuses are normal command outcomes.
-		// Report other errors if needed.
-		_ = leftErr
-		_ = rightErr
+		leftCmd.Wait()
+		rightCmd.Wait()
 
 		return
-	}
 
+	} else {
+
+		action := inputs[0]
+		if inputs[len(inputs)-1] == "&" && action != "echo" {
+			isBackground = true
+			inputs = inputs[:len(inputs)-1]
+		}
+		args := inputs[1:]
+
+		args, outFile, errFile, err := parseRedirect(args)
+		if err != nil {
+			fmt.Println("Error parsing redirect: ", err)
+			return
+		}
+
+		if outFile != nil {
+			command.Stdout = outFile
+		}
+		if errFile != nil {
+			command.Stderr = errFile
+		}
+
+		if cmd, isBuiltin := BuiltinCmds[action]; isBuiltin {
+			cmd.Stdout = command.Stdout
+			cmd.Stderr = command.Stderr
+			cmd.stdin = command.stdin
+			cmd.Run(args)
+
+		} else if _, err := exec.LookPath(action); err == nil {
+			cmd := exec.Command(action, args...)
+			cmd.Stdout = command.Stdout
+			cmd.Stderr = command.Stderr
+			cmd.Stdin = command.stdin
+
+			if !isBackground {
+
+				if err := cmd.Start(); err != nil {
+					var exitErr *exec.ExitError
+					// Only print non-exit message
+					if isExit := errors.As(err, &exitErr); !isExit {
+						fmt.Fprintln(command.Stderr, err)
+					}
+				}
+
+			} else {
+				if err := cmd.Start(); err != nil {
+					fmt.Fprintln(command.Stderr, err)
+				} else {
+					job := &Job{number: len(jobs) + 1, cmd: cmd, done: make(chan struct{}), inputLine: line}
+					jobs = append(jobs, job)
+
+					go func() {
+						cmd.Wait()
+						close(job.done)
+					}()
+					fmt.Printf("[%d] %d\n", job.number, cmd.Process.Pid)
+				}
+			}
+
+		} else {
+			fmt.Fprintln(os.Stderr, action+": command not found")
+		}
+
+		// Clean up opened file
+		if outFile != nil {
+			outFile.Close()
+		}
+		if errFile != nil {
+			errFile.Close()
+		}
+	}
 }
