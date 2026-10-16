@@ -120,6 +120,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"slices"
 	"strings"
 
 	"github.com/chzyer/readline"
@@ -141,7 +142,6 @@ func main() {
 	rl.CaptureExitSignal()
 
 	for {
-		isbBackground := false
 
 		line, err := rl.Readline()
 		if err == readline.ErrInterrupt {
@@ -159,9 +159,36 @@ func main() {
 			continue
 		}
 
+		// FROM HERE WE WILL CHECK IF THERE IS | OR |& AND IF ANY OF THEM IS THERE WE WILL GET THE STDOUT FROM THE FIRST COMMAND
+		// AND PASS IT AS A STDIN TO THE SECCOND COMMAND
+		command := Command{}
+		command.stdin = os.Stdin
+		command.Stdout = os.Stdout
+		command.handleCommand(inputs, line, false)
+
+		printJobs(true)
+	}
+}
+
+func (command *Command) handleCommand(inputs []string, line string, isPipe bool) {
+	isBackground := false
+
+	if i := slices.Index(inputs, "|"); i != -1 {
+		r, w, _ := os.Pipe()
+		lCommand := Command{}
+		lCommand.stdin = command.stdin
+		lCommand.Stdout = w
+		lCommand.handleCommand(inputs[:i], line, true)
+		rCommand := Command{}
+		rCommand.stdin = r
+		rCommand.Stdout = command.Stdout
+		rCommand.handleCommand(inputs[i+1:], line, false)
+
+	} else {
+
 		action := inputs[0]
 		if inputs[len(inputs)-1] == "&" && action != "echo" {
-			isbBackground = true
+			isBackground = true
 			inputs = inputs[:len(inputs)-1]
 		}
 		args := inputs[1:]
@@ -169,39 +196,39 @@ func main() {
 		args, outFile, errFile, err := parseRedirect(args)
 		if err != nil {
 			fmt.Println("Error parsing redirect: ", err)
-			continue
+			return
 		}
-		stdout := os.Stdout
-		stderr := os.Stderr
+
 		if outFile != nil {
-			stdout = outFile
+			command.Stdout = outFile
 		}
 		if errFile != nil {
-			stderr = errFile
+			command.Stderr = errFile
 		}
 
 		if cmd, isBuiltin := BuiltinCmds[action]; isBuiltin {
-			cmd.Stdout = stdout
-			cmd.Stderr = stderr
+			cmd.Stdout = command.Stdout
+			cmd.Stderr = command.Stderr
 			cmd.Run(args)
 
 		} else if _, err := exec.LookPath(action); err == nil {
 			cmd := exec.Command(action, args...)
-			cmd.Stdout = stdout
-			cmd.Stderr = stderr
-			if !isbBackground {
+			cmd.Stdout = command.Stdout
+			cmd.Stderr = command.Stderr
+
+			if !isBackground {
 
 				if err := cmd.Run(); err != nil {
 					var exitErr *exec.ExitError
 					// Only print non-exit message
 					if isExit := errors.As(err, &exitErr); !isExit {
-						fmt.Fprintln(stderr, err)
+						fmt.Fprintln(command.Stderr, err)
 					}
 				}
 
 			} else {
 				if err := cmd.Start(); err != nil {
-					fmt.Fprintln(stderr, err)
+					fmt.Fprintln(command.Stderr, err)
 				} else {
 					job := &Job{number: len(jobs) + 1, cmd: cmd, done: make(chan struct{}), inputLine: line}
 					jobs = append(jobs, job)
@@ -217,8 +244,6 @@ func main() {
 		} else {
 			fmt.Fprintln(os.Stderr, action+": command not found")
 		}
-
-		printJobs(true)
 
 		// Clean up opened file
 		if outFile != nil {
