@@ -248,7 +248,6 @@ func (command *Command) handleCommand(inputs []string, line string) {
 
 		if cmd, isBuiltin := BuiltinCmds[action]; isBuiltin {
 			cmd.Stdout = command.Stdout
-			cmd.Stderr = command.Stderr
 			cmd.stdin = command.stdin
 			cmd.Run(args)
 
