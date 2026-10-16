@@ -120,7 +120,6 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"slices"
 	"strings"
 
 	"github.com/chzyer/readline"
@@ -160,7 +159,7 @@ func main() {
 			continue
 		}
 
-		if slices.Contains(inputs, "|") {
+		if hasPipe(inputs) {
 			runPipeline(inputs)
 			continue
 		}
@@ -234,134 +233,5 @@ func main() {
 		if errFile != nil {
 			errFile.Close()
 		}
-	}
-}
-
-func runPipeline(inputs []string) bool {
-	// Find the pipe operator.
-	pipeIndex := -1
-
-	for i, token := range inputs {
-		if token == "|" {
-			if pipeIndex != -1 {
-				fmt.Fprintln(os.Stderr, "multiple pipes are not supported yet")
-				return true
-			}
-			pipeIndex = i
-		}
-	}
-
-	// No pipeline: let the normal command handler run.
-	if pipeIndex == -1 {
-		return false
-	}
-
-	// Validate both sides.
-	if pipeIndex == 0 || pipeIndex == len(inputs)-1 {
-		fmt.Fprintln(os.Stderr, "invalid pipeline")
-		return true
-	}
-
-	left := inputs[:pipeIndex]
-	right := inputs[pipeIndex+1:]
-
-	// Parse redirections independently for each command.
-	leftArgs, leftOut, leftErr, err := parseRedirect(left[1:])
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "Error parsing redirect:", err)
-		return true
-	}
-
-	rightArgs, rightOut, rightErr, err := parseRedirect(right[1:])
-	if err != nil {
-		closeFile(leftOut)
-		closeFile(leftErr)
-		fmt.Fprintln(os.Stderr, "Error parsing redirect:", err)
-		return true
-	}
-
-	// Create the connection between the processes.
-	r, w, err := os.Pipe()
-	if err != nil {
-		closeFile(leftOut)
-		closeFile(leftErr)
-		closeFile(rightOut)
-		closeFile(rightErr)
-		fmt.Fprintln(os.Stderr, err)
-		return true
-	}
-
-	defer r.Close()
-	defer w.Close()
-
-	// Set up the left command.
-	leftCmd := exec.Command(left[0], leftArgs...)
-	leftCmd.Stdout = w
-	leftCmd.Stderr = os.Stderr
-
-	if leftOut != nil {
-		leftCmd.Stdout = leftOut
-	}
-	if leftErr != nil {
-		leftCmd.Stderr = leftErr
-	}
-
-	// Set up the right command.
-	rightCmd := exec.Command(right[0], rightArgs...)
-	rightCmd.Stdin = r
-	rightCmd.Stdout = os.Stdout
-	rightCmd.Stderr = os.Stderr
-
-	if rightOut != nil {
-		rightCmd.Stdout = rightOut
-	}
-	if rightErr != nil {
-		rightCmd.Stderr = rightErr
-	}
-
-	defer closeFile(leftOut)
-	defer closeFile(leftErr)
-	defer closeFile(rightOut)
-	defer closeFile(rightErr)
-
-	// Start the left process first.
-	if err := leftCmd.Start(); err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		return true
-	}
-
-	// Start the right process without waiting for the left.
-	if err := rightCmd.Start(); err != nil {
-		_ = w.Close()
-		_ = r.Close()
-		_ = leftCmd.Wait()
-		fmt.Fprintln(os.Stderr, err)
-		return true
-	}
-
-	// The parent must release its copies of the pipe handles.
-	// Otherwise, the reader might never receive EOF.
-	_ = w.Close()
-	_ = r.Close()
-
-	// Wait for both processes.
-	leftErrWait := leftCmd.Wait()
-	rightErrWait := rightCmd.Wait()
-
-	// Child processes normally print their own errors.
-	// Don't print exec.ExitError again.
-	for _, waitErr := range []error{leftErrWait, rightErrWait} {
-		var exitErr *exec.ExitError
-		if waitErr != nil && !errors.As(waitErr, &exitErr) {
-			fmt.Fprintln(os.Stderr, waitErr)
-		}
-	}
-
-	return true
-}
-
-func closeFile(file *os.File) {
-	if file != nil {
-		_ = file.Close()
 	}
 }
