@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -110,10 +109,10 @@ func runPipeline(inputs []string) error {
 
 			err = cmd.Run()
 
-			var exitErr *exec.ExitError
-			if err != nil && !errors.As(err, &exitErr) {
-				fmt.Fprintln(os.Stderr, err)
-			}
+			// var exitErr *exec.ExitError
+			// if err != nil && !errors.As(err, &exitErr) {
+			// 	fmt.Fprintln(os.Stderr, err)
+			// }
 
 			errs <- nil
 		}()
