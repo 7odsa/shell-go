@@ -46,7 +46,7 @@ var BuiltinCmds = map[string]Command{
 
 func handleHistory(cmd Command, args []string) {
 	// TODO
-	content, err := os.ReadFile(historyFIle)
+	content, err := os.ReadFile(historyFIlePath)
 	if err != nil {
 		log.Fatalf("Failed to open file: %s", err)
 	}

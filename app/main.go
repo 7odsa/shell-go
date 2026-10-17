@@ -126,13 +126,13 @@ import (
 )
 
 const prompt = "$ "
-const historyFIle = "/tmp/readline.tmp"
+const historyFIlePath = "/tmp/readline.tmp"
 
 func main() {
 	rl, err := readline.NewEx(&readline.Config{
 		Prompt:       prompt,
 		AutoComplete: NewCustomCompleter(prompt),
-		HistoryFile:  historyFIle,
+		HistoryFile:  historyFIlePath,
 		HistoryLimit: 20,
 	})
 	if err != nil {
@@ -235,4 +235,16 @@ func main() {
 			errFile.Close()
 		}
 	}
+
+	cleanup()
+}
+
+func cleanup() {
+	// Put code to close database pools, flush logs, or stop workers here
+	err := os.Remove(historyFIlePath)
+	if err != nil {
+		fmt.Println("Error deleting file:", err)
+		return
+	}
+	log.Println("Resources cleaned up.")
 }
