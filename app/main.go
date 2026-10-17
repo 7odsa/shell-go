@@ -123,17 +123,16 @@ import (
 	"strings"
 
 	"github.com/chzyer/readline"
+	"github.com/codecrafters-io/shell-starter-go/app/utils"
 )
 
 const prompt = "$ "
-const historyFIlePath = "/tmp/readline.tmp"
+const historyFIlePath = "/tmp/readline.txt"
 
 func main() {
 	rl, err := readline.NewEx(&readline.Config{
 		Prompt:       prompt,
 		AutoComplete: NewCustomCompleter(prompt),
-		HistoryFile:  historyFIlePath,
-		HistoryLimit: 20,
 	})
 	if err != nil {
 		log.Fatal(err)
@@ -234,6 +233,7 @@ func main() {
 		if errFile != nil {
 			errFile.Close()
 		}
+		utils.AddDataToaFile([]byte(line+"\n"), historyFIlePath)
 	}
 
 	cleanup()

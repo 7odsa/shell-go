@@ -55,12 +55,14 @@ func handleHistory(cmd Command, args []string) {
 	var words []string
 	i := 1
 	limit := -1
+	historyWord := "history"
 	if len(args) != 0 {
 
 		limit, err = strconv.Atoi(args[0])
 		if err != nil {
 			limit = -1
 		}
+		historyWord += " " + strconv.Itoa(limit)
 
 	}
 	for _, char := range content {
@@ -73,6 +75,8 @@ func handleHistory(cmd Command, args []string) {
 		word += string(char)
 
 	}
+	words = append(words, "\t"+strconv.Itoa(i)+"  "+historyWord)
+
 	if limit == -1 {
 		limit = len(words)
 	}
