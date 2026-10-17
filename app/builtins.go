@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"os/exec"
 	"slices"
@@ -45,6 +46,26 @@ var BuiltinCmds = map[string]Command{
 
 func handleHistory(cmd Command, args []string) {
 	// TODO
+	content, err := os.ReadFile(historyFIle)
+	if err != nil {
+		log.Fatalf("Failed to open file: %s", err)
+	}
+
+	word := ""
+	i := 1
+
+	for _, char := range content {
+		if string(char) == "\n" {
+			fmt.Fprintln(cmd.Stdout, "\t"+strconv.Itoa(i)+"  "+string(word))
+			word = ""
+			i++
+			continue
+		}
+		word += string(char)
+
+	}
+	fmt.Fprintln(cmd.Stdout, "\t"+strconv.Itoa(i)+"  history")
+
 }
 
 func handleJobs(cmd Command, args []string) {

@@ -126,12 +126,13 @@ import (
 )
 
 const prompt = "$ "
+const historyFIle = "/tmp/readline.tmp"
 
 func main() {
 	rl, err := readline.NewEx(&readline.Config{
 		Prompt:       prompt,
 		AutoComplete: NewCustomCompleter(prompt),
-		HistoryFile:  "/tmp/readline.tmp",
+		HistoryFile:  historyFIle,
 		HistoryLimit: 20,
 	})
 	if err != nil {
