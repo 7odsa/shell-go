@@ -64,7 +64,7 @@ func handleHistory(cmd Command, args []string) {
 		word += string(char)
 
 	}
-	fmt.Fprintln(cmd.Stdout, "\t"+strconv.Itoa(i)+"  history")
+	// fmt.Fprintln(cmd.Stdout, "\t"+strconv.Itoa(i)+"  history")
 
 }
 
