@@ -241,7 +241,7 @@ func main() {
 
 func cleanup() {
 	// Put code to close database pools, flush logs, or stop workers here
-	err := os.Remove(historyFIlePath)
+	err := os.Truncate(historyFIlePath, 0)
 	if err != nil {
 		fmt.Println("Error deleting file:", err)
 		return
