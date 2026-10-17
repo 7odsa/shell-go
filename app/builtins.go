@@ -3,12 +3,13 @@ package main
 import (
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"os/exec"
 	"slices"
 	"strconv"
 	"strings"
+
+	"github.com/codecrafters-io/shell-starter-go/app/utils"
 )
 
 type Command struct {
@@ -45,43 +46,22 @@ var BuiltinCmds = map[string]Command{
 }
 
 func handleHistory(cmd Command, args []string) {
-	// TODO
-	content, err := os.ReadFile(historyFIlePath)
-	if err != nil {
-		log.Fatalf("Failed to open file: %s", err)
-	}
 
-	word := ""
-	var words []string
-	i := 1
-	limit := -1
+	limit := len(utils.SavedHistory)
 	historyWord := "history"
 	if len(args) != 0 {
 
-		limit, err = strconv.Atoi(args[0])
-		if err != nil {
-			limit = -1
+		num, err := strconv.Atoi(args[0])
+
+		if err == nil {
+			limit = num
+			historyWord += " " + strconv.Itoa(limit)
 		}
-		historyWord += " " + strconv.Itoa(limit)
 
 	}
-	for _, char := range content {
-		if string(char) == "\n" {
-			words = append(words, "\t"+strconv.Itoa(i)+"  "+string(word))
-			word = ""
-			i++
-			continue
-		}
-		word += string(char)
 
-	}
-	words = append(words, "\t"+strconv.Itoa(i)+"  "+historyWord)
-
-	if limit == -1 {
-		limit = len(words)
-	}
-	for n := len(words) - limit; n < len(words); n++ {
-		fmt.Fprintln(cmd.Stdout, words[n])
+	for n := len(utils.SavedHistory) - limit; n < len(utils.SavedHistory); n++ {
+		fmt.Fprint(cmd.Stdout, "    "+strconv.Itoa(n+1)+"  "+utils.SavedHistory[n])
 
 	}
 

@@ -153,6 +153,9 @@ func main() {
 		} else if err == io.EOF {
 			break
 		}
+
+		utils.SavedHistory = append(utils.SavedHistory, line+"\n")
+
 		inputs := tokenize(strings.TrimSpace(line))
 
 		if len(inputs) == 0 {
@@ -233,18 +236,18 @@ func main() {
 		if errFile != nil {
 			errFile.Close()
 		}
-		utils.AddDataToaFile([]byte(line+"\n"), historyFIlePath)
+		// utils.AddDataToaFile([]byte(line+"\n"), historyFIlePath)
 	}
 
-	cleanup()
+	// cleanup()
 }
 
-func cleanup() {
-	// Put code to close database pools, flush logs, or stop workers here
-	err := os.Truncate(historyFIlePath, 0)
-	if err != nil {
-		fmt.Println("Error deleting file:", err)
-		return
-	}
-	log.Println("Resources cleaned up.")
-}
+// func cleanup() {
+// 	// Put code to close database pools, flush logs, or stop workers here
+// 	err := os.Truncate(historyFIlePath, 0)
+// 	if err != nil {
+// 		fmt.Println("Error deleting file:", err)
+// 		return
+// 	}
+// 	log.Println("Resources cleaned up.")
+// }
