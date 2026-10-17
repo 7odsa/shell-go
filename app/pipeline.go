@@ -5,7 +5,6 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"strings"
 )
 
 // Split tokens into individual commands at each pipe.
@@ -60,19 +59,16 @@ func runPipeline(inputs []string) error {
 	errs := make(chan error, len(commands))
 
 	for i, tokens := range commands {
-		i, tokens := i, tokens
 
 		go func() {
 			var stdin io.Reader = os.Stdin
 			var stdout io.Writer = os.Stdout
 
-			// Every command except the first reads from the previous pipe.
 			if i > 0 {
 				stdin = readers[i-1]
 				defer readers[i-1].Close()
 			}
 
-			// Every command except the last writes to the next pipe.
 			if i < len(commands)-1 {
 				stdout = writers[i]
 				defer writers[i].Close()
@@ -82,8 +78,6 @@ func runPipeline(inputs []string) error {
 			args := tokens[1:]
 
 			if builtin, ok := BuiltinCmds[action]; ok {
-				// Copy the value so stream configuration doesn't modify
-				// the shared Command stored in BuiltinCmds.
 				cmd := builtin
 				cmd.stdin = stdin
 				cmd.Stdout = stdout
@@ -94,7 +88,6 @@ func runPipeline(inputs []string) error {
 				return
 			}
 
-			// Check PATH so an invalid command gets a shell-like message.
 			path, err := exec.LookPath(action)
 			if err != nil {
 				fmt.Fprintln(os.Stderr, action+": command not found")
@@ -118,16 +111,9 @@ func runPipeline(inputs []string) error {
 		}()
 	}
 
-	// Wait until every stage has finished.
 	for range commands {
 		<-errs
 	}
 
 	return nil
-}
-
-// Keep this helper available if you want to check whether a pipeline
-// contains more than one command.
-func pipelineCommandCount(inputs []string) int {
-	return len(strings.Fields(strings.Join(inputs, " ")))
 }

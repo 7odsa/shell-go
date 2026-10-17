@@ -30,7 +30,7 @@ func (c Command) Run(args []string) {
 	c.exec(c, args)
 }
 
-var BuiltinNames = []string{"echo", "type", "pwd", "cd", "exit", "complete", "jobs"}
+var BuiltinNames = []string{"echo", "type", "pwd", "cd", "exit", "complete", "jobs", "history"}
 
 var BuiltinCmds = map[string]Command{
 	"echo":     {exec: handleEcho},
@@ -40,6 +40,11 @@ var BuiltinCmds = map[string]Command{
 	"exit":     {exec: handleExit},
 	"complete": {exec: handleComplete},
 	"jobs":     {exec: handleJobs},
+	"history":  {exec: handleHistory},
+}
+
+func handleHistory(cmd Command, args []string) {
+	// TODO
 }
 
 func handleJobs(cmd Command, args []string) {
