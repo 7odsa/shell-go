@@ -46,8 +46,18 @@ var BuiltinCmds = map[string]Command{
 	"declare":  {exec: handleDeclare},
 }
 
+var declareVars map[string]string
+
 func handleDeclare(cmd Command, args []string) {
-	// TODO
+	if len(args) > 1 {
+		if args[0] == "-p" {
+			if val, isVar := declareVars[args[1]]; !isVar {
+				fmt.Fprintln(cmd.Stdout, "declare: "+args[1]+": not ffound")
+			} else {
+				val = val
+			}
+		}
+	}
 
 }
 
