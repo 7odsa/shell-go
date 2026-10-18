@@ -66,7 +66,7 @@ func handleHistory(cmd Command, args []string) {
 	}
 
 	for n := len(utils.SavedHistory) - limit; n < len(utils.SavedHistory); n++ {
-		fmt.Fprint(cmd.Stdout, "    "+strconv.Itoa(n+1)+"  "+utils.SavedHistory[n])
+		fmt.Fprint(cmd.Stdout, "    "+strconv.Itoa(n+1)+"  "+utils.SavedHistory[n]+"\n")
 
 	}
 

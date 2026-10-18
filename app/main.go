@@ -155,7 +155,7 @@ func main() {
 			break
 		}
 
-		utils.SavedHistory = append(utils.SavedHistory, line+"\n")
+		utils.SavedHistory = append(utils.SavedHistory, line)
 
 		inputs := tokenize(strings.TrimSpace(line))
 
