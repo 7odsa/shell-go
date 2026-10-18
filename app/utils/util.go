@@ -41,7 +41,7 @@ func ReadDataFromFile(path string) []string {
 	return filesData
 }
 
-func AddDataToaFile(data []byte, filePath string) {
+func AppendDataToaFile(data []byte, filePath string) {
 	flag := os.O_WRONLY | os.O_CREATE | os.O_APPEND
 
 	f, err := os.OpenFile(filePath, flag, 0644)
@@ -51,7 +51,18 @@ func AddDataToaFile(data []byte, filePath string) {
 			err = err1
 		}
 	}
+}
 
+func PutDataToaFile(data []byte, filePath string) {
+	flag := os.O_WRONLY | os.O_CREATE | os.O_TRUNC
+
+	f, err := os.OpenFile(filePath, flag, 0644)
+	if err == nil {
+		_, err = f.Write(data)
+		if err1 := f.Close(); err1 != nil && err == nil {
+			err = err1
+		}
+	}
 }
 
 func HandleQuotes(prompt string) []string {

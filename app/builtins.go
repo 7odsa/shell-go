@@ -58,12 +58,12 @@ func handleHistory(cmd Command, args []string) {
 			case "-w":
 				data := strings.Join(utils.SavedHistory, "\n")
 				data = data + "\n"
-				utils.AddDataToaFile([]byte(data), args[1])
+				utils.AppendDataToaFile([]byte(data), args[1])
 				return
 			case "-a":
 				data := strings.Join(utils.SavedHistory[utils.HistoryAppended:], "\n")
 				data = data + "\n"
-				utils.AddDataToaFile([]byte(data), args[1])
+				utils.AppendDataToaFile([]byte(data), args[1])
 				utils.HistoryAppended = len(utils.SavedHistory)
 				return
 			}

@@ -253,7 +253,7 @@ func main() {
 func deferClosing(args string) {
 	data := strings.Join(utils.SavedHistory[utils.HistoryAppended:], "\n")
 	data = data + "\n"
-	utils.AddDataToaFile([]byte(data), args)
+	utils.PutDataToaFile([]byte(data), args)
 	utils.HistoryAppended = len(utils.SavedHistory)
 
 	// // Put code to close database pools, flush logs, or stop workers here
