@@ -62,7 +62,7 @@ func handleDeclare(cmd Command, args []string) {
 	}
 	if i := strings.Index(args[0], "="); i != -1 {
 		if isDigit(args[0][0]) {
-			fmt.Fprintln(cmd.Stdout, "declare: "+args[0]+": is not a valid identifier")
+			fmt.Fprintln(cmd.Stdout, "declare: '"+args[0]+"': not a valid identifier")
 			return
 		}
 		key := args[0][:i]
