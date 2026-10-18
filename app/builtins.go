@@ -56,7 +56,7 @@ func handleHistory(cmd Command, args []string) {
 				return
 			} else if args[0] == "-w" {
 				data := strings.Join(utils.SavedHistory, "\n")
-				data = strings.TrimSuffix(data, "\n")
+				data = strings.TrimRight(data, "\n")
 				utils.AddDataToaFile([]byte(data), args[1])
 				return
 			}
