@@ -131,6 +131,13 @@ const prompt = "$ "
 // const historyFIlePath = "/tmp/readline.txt"
 
 func main() {
+
+	histFile := os.Getenv("HISTFILE")
+	if histFile != "" {
+		utils.SavedHistory = append(utils.SavedHistory, utils.ReadDataFromFile(histFile)...)
+		utils.HistoryAppended = len(utils.SavedHistory)
+	}
+
 	rl, err := readline.NewEx(&readline.Config{
 		Prompt:       prompt,
 		AutoComplete: NewCustomCompleter(prompt),
