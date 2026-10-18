@@ -63,7 +63,7 @@ func handleDeclare(cmd Command, args []string) {
 	if i := strings.Index(args[0], "="); i != -1 {
 		key := args[0][:i]
 		val := args[0][i+1:]
-		declareVars[key] = declareVars[val]
+		declareVars[key] = val
 	}
 }
 
