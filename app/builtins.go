@@ -49,21 +49,22 @@ var BuiltinCmds = map[string]Command{
 var declareVars map[string]string
 
 func handleDeclare(cmd Command, args []string) {
-	if len(args) > 0 {
-		if args[0] == "-p" {
-			if val, isVar := declareVars[args[1]]; !isVar {
-				fmt.Fprintln(cmd.Stdout, "declare: "+args[1]+": not found")
-			} else {
-				fmt.Fprintln(cmd.Stdout, "declare -- "+args[1]+"=\""+val+"\"")
-			}
-		}
-		if i := strings.Index(args[1], "="); i != -1 {
-			key := args[1][:i]
-			val := args[1][i+1:]
-			declareVars[key] = declareVars[val]
-		}
+	if len(args) <= 0 {
+		return
 	}
 
+	if args[0] == "-p" && len(args) > 1 {
+		if val, isVar := declareVars[args[1]]; !isVar {
+			fmt.Fprintln(cmd.Stdout, "declare: "+args[1]+": not found")
+		} else {
+			fmt.Fprintln(cmd.Stdout, "declare -- "+args[1]+"=\""+val+"\"")
+		}
+	}
+	if i := strings.Index(args[1], "="); i != -1 {
+		key := args[0][:i]
+		val := args[0][i+1:]
+		declareVars[key] = declareVars[val]
+	}
 }
 
 func handleHistory(cmd Command, args []string) {
