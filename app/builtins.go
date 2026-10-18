@@ -46,7 +46,7 @@ var BuiltinCmds = map[string]Command{
 	"declare":  {exec: handleDeclare},
 }
 
-var declareVars map[string]string
+var declareVars map[string]string = make(map[string]string)
 
 func handleDeclare(cmd Command, args []string) {
 	if len(args) <= 0 {
