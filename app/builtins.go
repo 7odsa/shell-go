@@ -52,7 +52,7 @@ func handleDeclare(cmd Command, args []string) {
 	if len(args) > 1 {
 		if args[0] == "-p" {
 			if val, isVar := declareVars[args[1]]; !isVar {
-				fmt.Fprintln(cmd.Stdout, "declare: "+args[1]+": not ffound")
+				fmt.Fprintln(cmd.Stdout, "declare: "+args[1]+": not found")
 			} else {
 				val = val
 			}
