@@ -16,6 +16,7 @@ type Command struct {
 }
 
 var SavedHistory []string
+var HistoryAppended int
 
 func ReadDataFromFile(path string) []string {
 	data, err := os.ReadFile(path)
