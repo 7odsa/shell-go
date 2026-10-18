@@ -60,7 +60,7 @@ func handleDeclare(cmd Command, args []string) {
 			fmt.Fprintln(cmd.Stdout, "declare -- "+args[1]+"=\""+val+"\"")
 		}
 	}
-	if i := strings.Index(args[1], "="); i != -1 {
+	if i := strings.Index(args[0], "="); i != -1 {
 		key := args[0][:i]
 		val := args[0][i+1:]
 		declareVars[key] = declareVars[val]
