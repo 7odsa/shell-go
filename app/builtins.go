@@ -61,7 +61,7 @@ func handleDeclare(cmd Command, args []string) {
 		}
 	}
 	if i := strings.Index(args[0], "="); i != -1 {
-		if isDigit(args[0][0]) {
+		if !(isLetter(args[0][0]) || args[0][0] == '_') {
 			fmt.Fprintln(cmd.Stdout, "declare: `"+args[0]+"': not a valid identifier")
 			return
 		}
@@ -69,6 +69,9 @@ func handleDeclare(cmd Command, args []string) {
 		val := args[0][i+1:]
 		declareVars[key] = val
 	}
+}
+func isLetter(c byte) bool {
+	return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')
 }
 
 func isDigit(b byte) bool {
