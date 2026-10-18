@@ -127,7 +127,8 @@ import (
 )
 
 const prompt = "$ "
-const historyFIlePath = "/tmp/readline.txt"
+
+// const historyFIlePath = "/tmp/readline.txt"
 
 func main() {
 	rl, err := readline.NewEx(&readline.Config{

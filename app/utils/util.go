@@ -17,18 +17,40 @@ type Command struct {
 
 var SavedHistory []string
 
-// func AddDataToaFile(data []byte, filePath string) {
-// 	flag := os.O_WRONLY | os.O_CREATE | os.O_APPEND
+func ReadDataFromFile(path string) []string {
+	data, err := os.ReadFile(path)
 
-// 	f, err := os.OpenFile(filePath, flag, 0644)
-// 	if err == nil {
-// 		_, err = f.Write(data)
-// 		if err1 := f.Close(); err1 != nil && err == nil {
-// 			err = err1
-// 		}
-// 	}
+	if err != nil {
+		return []string{}
+	}
+	word := ""
+	var filesData []string
+	for _, c := range data {
+		if string(c) == "\n" {
+			filesData = append(filesData, word)
+			word = ""
+		}
+		word += string(c)
+	}
+	if word != "" {
+		filesData = append(filesData, word)
+	}
 
-// }
+	return filesData
+}
+
+func AddDataToaFile(data []byte, filePath string) {
+	flag := os.O_WRONLY | os.O_CREATE | os.O_APPEND
+
+	f, err := os.OpenFile(filePath, flag, 0644)
+	if err == nil {
+		_, err = f.Write(data)
+		if err1 := f.Close(); err1 != nil && err == nil {
+			err = err1
+		}
+	}
+
+}
 
 func HandleQuotes(prompt string) []string {
 	var word string = ""

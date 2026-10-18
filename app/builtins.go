@@ -48,14 +48,19 @@ var BuiltinCmds = map[string]Command{
 func handleHistory(cmd Command, args []string) {
 
 	limit := len(utils.SavedHistory)
-	historyWord := "history"
 	if len(args) != 0 {
+
+		if args[0] == "-r" {
+			if len(args) > 1 {
+				utils.SavedHistory = append(utils.SavedHistory, utils.ReadDataFromFile(args[1])...)
+			}
+			return
+		}
 
 		num, err := strconv.Atoi(args[0])
 
 		if err == nil {
 			limit = num
-			historyWord += " " + strconv.Itoa(limit)
 		}
 
 	}
