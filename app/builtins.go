@@ -51,12 +51,13 @@ func handleHistory(cmd Command, args []string) {
 	if len(args) != 0 {
 
 		if len(args) > 1 {
-			if args[0] == "-r" {
+			switch args[0] {
+			case "-r":
 				utils.SavedHistory = append(utils.SavedHistory, utils.ReadDataFromFile(args[1])...)
 				return
-			} else if args[0] == "-w" {
+			case "-w":
 				data := strings.Join(utils.SavedHistory, "\n")
-				data = strings.TrimRight(data, "\n")
+				data = data + "\n"
 				utils.AddDataToaFile([]byte(data), args[1])
 				return
 			}
