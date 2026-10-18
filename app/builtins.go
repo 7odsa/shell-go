@@ -50,11 +50,14 @@ func handleHistory(cmd Command, args []string) {
 	limit := len(utils.SavedHistory)
 	if len(args) != 0 {
 
-		if args[0] == "-r" {
-			if len(args) > 1 {
+		if len(args) > 1 {
+			if args[0] == "-r" {
 				utils.SavedHistory = append(utils.SavedHistory, utils.ReadDataFromFile(args[1])...)
+				return
+			} else if args[0] == "-w" {
+				utils.AddDataToaFile([]byte(strings.Join(utils.SavedHistory, "\n")), args[1])
+				return
 			}
-			return
 		}
 
 		num, err := strconv.Atoi(args[0])
