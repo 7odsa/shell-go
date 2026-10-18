@@ -61,18 +61,22 @@ func handleDeclare(cmd Command, args []string) {
 		}
 	}
 	if i := strings.Index(args[0], "="); i != -1 {
-		if !(isLetter(args[0][0]) || args[0][0] == '_') {
-			fmt.Fprintln(cmd.Stdout, "declare: `"+args[0]+"': not a valid identifier")
-			return
-		}
-		for _, b := range args[0] {
+
+		key := args[0][:i]
+		for i, b := range key {
+			if i == 0 {
+				if !(isLetter(key[0]) || key[0] == '_') {
+					fmt.Fprintln(cmd.Stdout, "declare: `"+args[0]+"': not a valid identifier")
+					return
+				}
+				continue
+			}
 			if !(isLetter(byte(b)) || b == '_' || isDigit(byte(b))) {
 				fmt.Fprintln(cmd.Stdout, "declare: `"+args[0]+"': not a valid identifier")
 				return
 			}
 		}
 
-		key := args[0][:i]
 		val := args[0][i+1:]
 		declareVars[key] = val
 	}
