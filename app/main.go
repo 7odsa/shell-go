@@ -247,15 +247,20 @@ func main() {
 		// utils.AddDataToaFile([]byte(line+"\n"), historyFIlePath)
 	}
 
-	// cleanup()
+	deferClosing(histFile)
 }
 
-// func cleanup() {
-// 	// Put code to close database pools, flush logs, or stop workers here
-// 	err := os.Truncate(historyFIlePath, 0)
-// 	if err != nil {
-// 		fmt.Println("Error deleting file:", err)
-// 		return
-// 	}
-// 	log.Println("Resources cleaned up.")
-// }
+func deferClosing(args string) {
+	data := strings.Join(utils.SavedHistory[utils.HistoryAppended:], "\n")
+	data = data + "\n"
+	utils.AddDataToaFile([]byte(data), args)
+	utils.HistoryAppended = len(utils.SavedHistory)
+
+	// // Put code to close database pools, flush logs, or stop workers here
+	// err := os.Truncate(historyFIlePath, 0)
+	// if err != nil {
+	// 	fmt.Println("Error deleting file:", err)
+	// 	return
+	// }
+	// log.Println("Resources cleaned up.")
+}
