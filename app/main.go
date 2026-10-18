@@ -129,10 +129,11 @@ import (
 const prompt = "$ "
 
 // const historyFIlePath = "/tmp/readline.txt"
+var histFile string
 
 func main() {
 
-	histFile := os.Getenv("HISTFILE")
+	histFile = os.Getenv("HISTFILE")
 	if histFile != "" {
 		utils.SavedHistory = append(utils.SavedHistory, utils.ReadDataFromFile(histFile)...)
 		utils.HistoryAppended = len(utils.SavedHistory)
@@ -161,7 +162,6 @@ func main() {
 		} else if err == io.EOF {
 			break
 		}
-
 		utils.SavedHistory = append(utils.SavedHistory, line)
 
 		inputs := tokenize(strings.TrimSpace(line))
@@ -247,13 +247,13 @@ func main() {
 		// utils.AddDataToaFile([]byte(line+"\n"), historyFIlePath)
 	}
 
-	deferClosing(histFile)
+	deferClosing()
 }
 
-func deferClosing(args string) {
+func deferClosing() {
 	data := strings.Join(utils.SavedHistory[utils.HistoryAppended:], "\n")
 	data = data + "\n"
-	utils.PutDataToaFile([]byte(data), args)
+	utils.AppendDataToaFile([]byte(data), histFile)
 	utils.HistoryAppended = len(utils.SavedHistory)
 
 	// // Put code to close database pools, flush logs, or stop workers here

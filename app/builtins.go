@@ -221,5 +221,6 @@ func handlePwd(cmd Command, args []string) {
 }
 
 func handleExit(cmd Command, args []string) {
+	deferClosing()
 	os.Exit(0)
 }
