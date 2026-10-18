@@ -61,11 +61,10 @@ func handleDeclare(cmd Command, args []string) {
 		}
 	}
 	if i := strings.Index(args[0], "="); i != -1 {
-		// if !(isLetter(args[0][0]) || args[0][0] == '_') {
-		// 	fmt.Fprintln(cmd.Stdout, "declare: `"+args[0]+"': not a valid identifier")
-		// 	return
-		// }
-		fmt.Fprintln(cmd.Stdout, "declare: `"+args[0]+"': not a valid identifier")
+		if !(isLetter(args[0][0]) || args[0][0] == '_') {
+			fmt.Fprintln(cmd.Stdout, "declare: `"+args[0]+"': not a valid identifier")
+			return
+		}
 
 		key := args[0][:i]
 		val := args[0][i+1:]
