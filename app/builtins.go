@@ -61,10 +61,18 @@ func handleDeclare(cmd Command, args []string) {
 		}
 	}
 	if i := strings.Index(args[0], "="); i != -1 {
+		if isDigit(args[0][0]) {
+			fmt.Fprintln(cmd.Stdout, "declare: "+args[0]+": is not a valid identifier")
+			return
+		}
 		key := args[0][:i]
 		val := args[0][i+1:]
 		declareVars[key] = val
 	}
+}
+
+func isDigit(b byte) bool {
+	return b >= '0' && b <= '9'
 }
 
 func handleHistory(cmd Command, args []string) {
