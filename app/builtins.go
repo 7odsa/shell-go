@@ -54,8 +54,13 @@ func handleDeclare(cmd Command, args []string) {
 			if val, isVar := declareVars[args[1]]; !isVar {
 				fmt.Fprintln(cmd.Stdout, "declare: "+args[1]+": not found")
 			} else {
-				val = val
+				fmt.Fprintln(cmd.Stdout, "declare -- "+args[1]+"=\""+val+"\"")
 			}
+		}
+		if i := strings.Index(args[1], "="); i != -1 {
+			key := args[1][:i]
+			val := args[1][i+1:]
+			declareVars[key] = declareVars[val]
 		}
 	}
 
