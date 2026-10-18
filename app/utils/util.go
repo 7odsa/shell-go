@@ -29,6 +29,7 @@ func ReadDataFromFile(path string) []string {
 		if string(c) == "\n" {
 			filesData = append(filesData, word)
 			word = ""
+			continue
 		}
 		word += string(c)
 	}
