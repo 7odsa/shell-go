@@ -49,14 +49,16 @@ var BuiltinCmds = map[string]Command{
 var declareVars map[string]string = make(map[string]string)
 
 func replaceTheWordFromDeclareVars(inputs []string) {
-	for i, word := range inputs {
-		if word[0] == '$' {
-			if val, isVar := declareVars[word[1:]]; isVar {
-				inputs[i] = val
+	for _, word := range inputs {
+		for i, res := range word {
 
+			if res == '$' {
+				if val, isVar := declareVars[word[i:]]; isVar {
+					inputs[i] = val
+
+				}
 			}
 		}
-
 	}
 }
 
