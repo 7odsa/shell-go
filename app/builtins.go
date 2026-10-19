@@ -50,18 +50,19 @@ var declareVars map[string]string = make(map[string]string)
 
 func replaceTheWordFromDeclareVars(inputs []string) {
 	for i := 0; i < len(inputs); i++ {
-		var res strings.Builder
+		var res string = ""
 		word := inputs[i]
-
+		n := 0
 		for j := 0; j < len(word); {
 			if word[j] != '$' {
-				res.WriteByte(word[j])
+				res += string(word[j])
+				n = j
 				j++
 				continue
 			}
 
 			if j+1 >= len(word) {
-				res.WriteByte('$')
+				res += string('$')
 				j++
 				continue
 			}
@@ -69,6 +70,7 @@ func replaceTheWordFromDeclareVars(inputs []string) {
 			if word[j+1] == '{' {
 				k := strings.IndexByte(word[j+2:], '}')
 				if k == -1 {
+					res = res[:n]
 					break
 				}
 
@@ -76,7 +78,7 @@ func replaceTheWordFromDeclareVars(inputs []string) {
 				name := word[j+2 : k]
 
 				if val, ok := declareVars[name]; ok {
-					res.WriteString(val)
+					res += string(val)
 				}
 
 				j = k + 1
@@ -93,22 +95,22 @@ func replaceTheWordFromDeclareVars(inputs []string) {
 
 				name := word[j+1 : k]
 				if val, ok := declareVars[name]; ok {
-					res.WriteString(val)
+					res += string(val)
 				}
 
 				j = k
 				continue
 			}
 
-			res.WriteByte('$')
+			res += string('$')
 			j++
 		}
-		inputs[i] = res.String()
-		if res.String() == "" {
+
+		if res == "" {
 			inputs = slices.Delete(inputs, i, i+1)
 			i--
 		} else {
-			inputs[i] = res.String()
+			inputs[i] = res
 		}
 	}
 }
