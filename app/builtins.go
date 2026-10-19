@@ -50,15 +50,30 @@ var declareVars map[string]string = make(map[string]string)
 
 func replaceTheWordFromDeclareVars(inputs []string) {
 	for i, word := range inputs {
-		for j, res := range word {
+		res := ""
+		for j := 0; j < len(word); j++ {
 
-			if res == '$' {
-				if val, isVar := declareVars[word[j+1:]]; isVar {
-					inputs[i] = word[:j] + val
+			if word[j] == '$' {
+				if word[j+1] == '{' {
+					k := j
+					for ; k < len(word) && word[k] != '}'; k++ {
+					}
+					if (word[k]) == '}' {
+						if val, isVar := declareVars[word[j+2:k]]; isVar {
+							res = res + val
+						}
+					}
+					j = k
+
+				} else if val, isVar := declareVars[word[j+1:]]; isVar {
+					res = res + val
 					continue
 				}
+			} else {
+				res += string(word[j])
 			}
 		}
+		inputs[i] = res
 	}
 }
 
