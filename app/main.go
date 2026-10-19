@@ -165,7 +165,7 @@ func main() {
 		utils.SavedHistory = append(utils.SavedHistory, line)
 
 		inputs := tokenize(strings.TrimSpace(line))
-		replaceTheWordFromDeclareVars(inputs)
+		inputs = replaceTheWordFromDeclareVars(inputs)
 
 		if len(inputs) == 0 {
 			continue

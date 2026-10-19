@@ -48,7 +48,7 @@ var BuiltinCmds = map[string]Command{
 
 var declareVars map[string]string = make(map[string]string)
 
-func replaceTheWordFromDeclareVars(inputs []string) {
+func replaceTheWordFromDeclareVars(inputs []string) []string {
 	for i := 0; i < len(inputs); i++ {
 		var res string = ""
 		word := inputs[i]
@@ -113,6 +113,7 @@ func replaceTheWordFromDeclareVars(inputs []string) {
 			inputs[i] = res
 		}
 	}
+	return inputs
 }
 
 func handleDeclare(cmd Command, args []string) {
