@@ -103,6 +103,7 @@ func replaceTheWordFromDeclareVars(inputs []string) {
 			res.WriteByte('$')
 			j++
 		}
+		inputs[i] = res.String()
 		if res.String() == "" {
 			inputs = slices.Delete(inputs, i, i+1)
 			i--
