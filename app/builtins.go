@@ -50,30 +50,66 @@ var declareVars map[string]string = make(map[string]string)
 
 func replaceTheWordFromDeclareVars(inputs []string) {
 	for i, word := range inputs {
-		res := ""
-		for j := 0; j < len(word); j++ {
+		var res strings.Builder
 
-			if word[j] == '$' {
-				if word[j+1] == '{' {
-					k := j
-					for ; k < len(word) && word[k] != '}'; k++ {
-					}
-					if (word[k]) == '}' {
-						if val, isVar := declareVars[word[j+2:k]]; isVar {
-							res = res + val
-						}
-					}
-					j = k
-
-				} else if val, isVar := declareVars[word[j+1:]]; isVar {
-					res = res + val
-					continue
-				}
-			} else {
-				res += string(word[j])
+		for j := 0; j < len(word); {
+			if word[j] != '$' {
+				res.WriteByte(word[j])
+				j++
+				continue
 			}
+
+			// A trailing '$' is literal.
+			if j+1 >= len(word) {
+				res.WriteByte('$')
+				j++
+				continue
+			}
+
+			// Handle ${VAR}.
+			if word[j+1] == '{' {
+				k := strings.IndexByte(word[j+2:], '}')
+				if k == -1 {
+					// No closing brace: preserve the remaining text.
+					res.WriteString(word[j:])
+					break
+				}
+
+				k += j + 2
+				name := word[j+2 : k]
+
+				if val, ok := declareVars[name]; ok {
+					res.WriteString(val)
+				}
+
+				j = k + 1
+				continue
+			}
+
+			// Handle $VAR: consume the entire variable name.
+			k := j + 1
+			if isLetter(word[k]) || word[k] == '_' {
+				k++
+				for k < len(word) &&
+					(isLetter(word[k]) || isDigit(word[k]) || word[k] == '_') {
+					k++
+				}
+
+				name := word[j+1 : k]
+				if val, ok := declareVars[name]; ok {
+					res.WriteString(val)
+				}
+
+				j = k
+				continue
+			}
+
+			// '$' not followed by a variable name.
+			res.WriteByte('$')
+			j++
 		}
-		inputs[i] = res
+
+		inputs[i] = res.String()
 	}
 }
 
