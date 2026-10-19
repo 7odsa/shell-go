@@ -54,7 +54,7 @@ func replaceTheWordFromDeclareVars(inputs []string) {
 
 			if res == '$' {
 				if val, isVar := declareVars[word[i:]]; isVar {
-					inputs[i] = val
+					inputs[i] = word[:i] + val
 
 				}
 			}
