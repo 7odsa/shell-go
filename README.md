@@ -1,6 +1,6 @@
 # Shell-Go
 
-A Unix-style command-line shell built from scratch in **Go**, inspired by the CodeCrafters *Build Your Own Shell* challenge.
+A Unix-style command-line shell built from scratch in **Go**
 
 Shell-Go implements the core behavior of an interactive shell, including command parsing, process execution, I/O redirection, pipelines, background jobs, command history, autocompletion, and shell variable expansion.
 
