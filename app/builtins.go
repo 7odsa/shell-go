@@ -49,8 +49,9 @@ var BuiltinCmds = map[string]Command{
 var declareVars map[string]string = make(map[string]string)
 
 func replaceTheWordFromDeclareVars(inputs []string) {
-	for i, word := range inputs {
+	for i := 0; i < len(inputs); i++ {
 		var res strings.Builder
+		word := inputs[i]
 
 		for j := 0; j < len(word); {
 			if word[j] != '$' {
@@ -104,6 +105,7 @@ func replaceTheWordFromDeclareVars(inputs []string) {
 		}
 		if res.String() == "" {
 			inputs = slices.Delete(inputs, i, i+1)
+			i--
 		} else {
 			inputs[i] = res.String()
 		}
