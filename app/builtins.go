@@ -59,19 +59,15 @@ func replaceTheWordFromDeclareVars(inputs []string) {
 				continue
 			}
 
-			// A trailing '$' is literal.
 			if j+1 >= len(word) {
 				res.WriteByte('$')
 				j++
 				continue
 			}
 
-			// Handle ${VAR}.
 			if word[j+1] == '{' {
 				k := strings.IndexByte(word[j+2:], '}')
 				if k == -1 {
-					// No closing brace: preserve the remaining text.
-					res.WriteString(word[j:])
 					break
 				}
 
@@ -86,7 +82,6 @@ func replaceTheWordFromDeclareVars(inputs []string) {
 				continue
 			}
 
-			// Handle $VAR: consume the entire variable name.
 			k := j + 1
 			if isLetter(word[k]) || word[k] == '_' {
 				k++
@@ -104,7 +99,6 @@ func replaceTheWordFromDeclareVars(inputs []string) {
 				continue
 			}
 
-			// '$' not followed by a variable name.
 			res.WriteByte('$')
 			j++
 		}
